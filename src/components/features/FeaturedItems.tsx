@@ -17,7 +17,7 @@ export default function FeaturedItems() {
       id: 1,
       name: 'מצלמת Sony A7III',
       price: 120,
-      image: '/assets/items/camera.jpg',
+      image: 'https://images.pexels.com/photos/51383/photo-camera-subject-photographer-51383.jpeg',
       reviews: 28,
       rating: 4.9,
       category: 'מצלמות',
@@ -26,7 +26,7 @@ export default function FeaturedItems() {
       id: 2,
       name: 'אוהל קמפינג 4 אנשים',
       price: 75,
-      image: '/assets/items/tent.jpg',
+      image: 'https://images.pexels.com/photos/2582818/pexels-photo-2582818.jpeg',
       reviews: 42,
       rating: 4.8,
       category: 'ציוד קמפינג',
@@ -35,7 +35,7 @@ export default function FeaturedItems() {
       id: 3,
       name: 'קונסולת PlayStation 5',
       price: 85,
-      image: '/assets/items/ps5.jpg',
+      image: 'https://images.pexels.com/photos/442576/pexels-photo-442576.jpeg',
       reviews: 36,
       rating: 4.7,
       category: 'אלקטרוניקה',
@@ -44,7 +44,7 @@ export default function FeaturedItems() {
       id: 4,
       name: 'תרמיל גב מקצועי',
       price: 30,
-      image: '/assets/items/backpack.jpg',
+      image: 'https://images.pexels.com/photos/1282316/pexels-photo-1282316.jpeg',
       reviews: 19,
       rating: 4.6,
       category: 'ציוד טיולים',
@@ -53,7 +53,7 @@ export default function FeaturedItems() {
       id: 5,
       name: 'מקדחה חשמלית',
       price: 45,
-      image: '/assets/items/drill.jpg',
+      image: 'https://images.pexels.com/photos/162553/keys-workshop-mechanic-tools-162553.jpeg',
       reviews: 57,
       rating: 4.8,
       category: 'כלי עבודה',
@@ -107,6 +107,7 @@ export default function FeaturedItems() {
                         alt={item.name}
                         fill
                         className="object-cover"
+                        unoptimized
                       />
                       <div className="absolute top-2 right-2 bg-white/80 text-sm font-medium text-gray-900 py-1 px-2 rounded">
                         {item.category}

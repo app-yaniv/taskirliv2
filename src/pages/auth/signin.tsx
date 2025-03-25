@@ -133,6 +133,15 @@ export default function SignIn() {
             </button>
           </div>
         </form>
+
+        <div className="mt-4 text-center">
+          <Link 
+            href="/" 
+            className="text-sm font-medium text-gray-600 hover:text-gray-900"
+          >
+            חזרה לדף הבית
+          </Link>
+        </div>
       </div>
     </div>
   )

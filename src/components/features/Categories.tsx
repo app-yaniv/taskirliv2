@@ -4,12 +4,36 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 const categories = [
-  { name: 'מצלמות', image: 'https://picsum.photos/400/300?random=1', count: '1,234' },
-  { name: 'ציוד די ג\'יי', image: 'https://picsum.photos/400/300?random=2', count: '856' },
-  { name: 'ציוד קמפינג', image: 'https://picsum.photos/400/300?random=3', count: '2,345' },
-  { name: 'כלי עבודה', image: 'https://picsum.photos/400/300?random=4', count: '3,456' },
-  { name: 'ציוד למסיבות', image: 'https://picsum.photos/400/300?random=5', count: '789' },
-  { name: 'ציוד ספורט', image: 'https://picsum.photos/400/300?random=6', count: '1,567' },
+  { 
+    name: 'ציוד קמפינג',
+    image: 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg',
+    count: '2,345'
+  },
+  { 
+    name: 'ציוד די ג\'יי',
+    image: 'https://images.pexels.com/photos/4090902/pexels-photo-4090902.jpeg',
+    count: '856'
+  },
+  { 
+    name: 'ציוד למסיבות',
+    image: 'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg',
+    count: '789'
+  },
+  { 
+    name: 'כלי עבודה',
+    image: 'https://images.pexels.com/photos/175039/pexels-photo-175039.jpeg',
+    count: '3,456'
+  },
+  { 
+    name: 'מצלמות',
+    image: 'https://images.pexels.com/photos/243757/pexels-photo-243757.jpeg',
+    count: '1,234'
+  },
+  { 
+    name: 'ציוד ספורט',
+    image: 'https://images.pexels.com/photos/4397840/pexels-photo-4397840.jpeg',
+    count: '1,567'
+  },
 ]
 
 export default function Categories() {
@@ -38,6 +62,7 @@ export default function Categories() {
                   alt={category.name}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-200"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
               </div>
               <div className="p-4">
