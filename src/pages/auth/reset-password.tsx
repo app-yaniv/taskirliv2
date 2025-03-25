@@ -25,9 +25,9 @@ export default function ResetPassword() {
         return
       }
 
-      setMessage('Check your email for the password reset link.')
+      setMessage('בדוק את האימייל שלך לקבלת קישור לאיפוס הסיסמה.')
     } catch (error) {
-      setError('An error occurred during password reset request.')
+      setError('אירעה שגיאה במהלך בקשת איפוס הסיסמה.')
       console.error(error)
     } finally {
       setLoading(false)
@@ -39,10 +39,10 @@ export default function ResetPassword() {
       <div className="w-full max-w-md space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Reset your password
+            איפוס סיסמה
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Enter your email address and we'll send you a link to reset your password.
+            הזן את כתובת האימייל שלך ונשלח לך קישור לאיפוס הסיסמה.
           </p>
         </div>
         {message ? (
@@ -53,7 +53,7 @@ export default function ResetPassword() {
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
               </div>
-              <div className="ml-3">
+              <div className="mr-3">
                 <p className="text-sm font-medium text-green-800">{message}</p>
               </div>
             </div>
@@ -62,7 +62,7 @@ export default function ResetPassword() {
           <form className="mt-8 space-y-6" onSubmit={handleResetPassword}>
             <div>
               <label htmlFor="email-address" className="sr-only">
-                Email address
+                כתובת אימייל
               </label>
               <input
                 id="email-address"
@@ -71,14 +71,15 @@ export default function ResetPassword() {
                 autoComplete="email"
                 required
                 className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
+                placeholder="כתובת אימייל"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                dir="ltr"
               />
             </div>
 
             {error && (
-              <div className="text-sm text-red-600">
+              <div className="text-sm text-red-600 text-right">
                 {error}
               </div>
             )}
@@ -89,7 +90,7 @@ export default function ResetPassword() {
                 disabled={loading}
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                {loading ? 'Sending reset link...' : 'Send password reset link'}
+                {loading ? 'שולח קישור...' : 'שלח קישור לאיפוס סיסמה'}
               </button>
             </div>
 
@@ -98,7 +99,7 @@ export default function ResetPassword() {
                 href="/auth/signin" 
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
-                Back to sign in
+                חזרה להתחברות
               </Link>
             </div>
           </form>

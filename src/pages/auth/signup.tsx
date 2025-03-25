@@ -20,7 +20,7 @@ export default function SignUp() {
 
     // Validate passwords
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
+      setError('הסיסמאות אינן תואמות')
       setLoading(false)
       return
     }
@@ -40,9 +40,9 @@ export default function SignUp() {
         return
       }
 
-      setMessage('Check your email for the confirmation link.')
+      setMessage('בדוק את האימייל שלך לקבלת קישור האישור.')
     } catch (error) {
-      setError('An error occurred during sign up.')
+      setError('אירעה שגיאה במהלך ההרשמה.')
       console.error(error)
     } finally {
       setLoading(false)
@@ -54,15 +54,15 @@ export default function SignUp() {
       <div className="w-full max-w-md space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create a new account
+            יצירת חשבון חדש
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+            או{' '}
             <Link 
               href="/auth/signin" 
               className="font-medium text-blue-600 hover:text-blue-500"
             >
-              sign in to your account
+              התחבר לחשבון קיים
             </Link>
           </p>
         </div>
@@ -74,7 +74,7 @@ export default function SignUp() {
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
               </div>
-              <div className="ml-3">
+              <div className="mr-3">
                 <p className="text-sm font-medium text-green-800">{message}</p>
               </div>
             </div>
@@ -84,7 +84,7 @@ export default function SignUp() {
             <div className="rounded-md shadow-sm -space-y-px">
               <div>
                 <label htmlFor="email-address" className="sr-only">
-                  Email address
+                  כתובת אימייל
                 </label>
                 <input
                   id="email-address"
@@ -93,14 +93,15 @@ export default function SignUp() {
                   autoComplete="email"
                   required
                   className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Email address"
+                  placeholder="כתובת אימייל"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  dir="ltr"
                 />
               </div>
               <div>
                 <label htmlFor="password" className="sr-only">
-                  Password
+                  סיסמה
                 </label>
                 <input
                   id="password"
@@ -109,14 +110,15 @@ export default function SignUp() {
                   autoComplete="new-password"
                   required
                   className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Password"
+                  placeholder="סיסמה"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  dir="ltr"
                 />
               </div>
               <div>
                 <label htmlFor="confirm-password" className="sr-only">
-                  Confirm Password
+                  אימות סיסמה
                 </label>
                 <input
                   id="confirm-password"
@@ -125,15 +127,16 @@ export default function SignUp() {
                   autoComplete="new-password"
                   required
                   className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Confirm Password"
+                  placeholder="אימות סיסמה"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  dir="ltr"
                 />
               </div>
             </div>
 
             {error && (
-              <div className="text-sm text-red-600">
+              <div className="text-sm text-red-600 text-right">
                 {error}
               </div>
             )}
@@ -144,7 +147,7 @@ export default function SignUp() {
                 disabled={loading}
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                {loading ? 'Creating account...' : 'Sign up'}
+                {loading ? 'יוצר חשבון...' : 'הרשמה'}
               </button>
             </div>
           </form>

@@ -10,7 +10,7 @@ export default function UpdatePassword() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const token = searchParams.get('token')
+  const token = searchParams?.get('token')
 
   // Check if we have an active session
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function UpdatePassword() {
     setMessage(null)
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
+      setError('הסיסמאות אינן תואמות')
       setLoading(false)
       return
     }
@@ -48,14 +48,14 @@ export default function UpdatePassword() {
         return
       }
 
-      setMessage('Your password has been updated successfully.')
+      setMessage('הסיסמה שלך עודכנה בהצלחה.')
       
       // Redirect to home after a delay
       setTimeout(() => {
         router.push('/')
       }, 2000)
     } catch (error) {
-      setError('An error occurred while updating your password.')
+      setError('אירעה שגיאה בעת עדכון הסיסמה שלך.')
       console.error(error)
     } finally {
       setLoading(false)
@@ -67,10 +67,10 @@ export default function UpdatePassword() {
       <div className="w-full max-w-md space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Update your password
+            עדכון סיסמה
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Please enter your new password below.
+            אנא הזן את הסיסמה החדשה שלך למטה.
           </p>
         </div>
         {message ? (
@@ -81,7 +81,7 @@ export default function UpdatePassword() {
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
               </div>
-              <div className="ml-3">
+              <div className="mr-3">
                 <p className="text-sm font-medium text-green-800">{message}</p>
               </div>
             </div>
@@ -91,7 +91,7 @@ export default function UpdatePassword() {
             <div className="rounded-md shadow-sm -space-y-px">
               <div>
                 <label htmlFor="password" className="sr-only">
-                  New Password
+                  סיסמה חדשה
                 </label>
                 <input
                   id="password"
@@ -100,15 +100,16 @@ export default function UpdatePassword() {
                   autoComplete="new-password"
                   required
                   className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="New Password"
+                  placeholder="סיסמה חדשה"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   minLength={6}
+                  dir="ltr"
                 />
               </div>
               <div>
                 <label htmlFor="confirm-password" className="sr-only">
-                  Confirm New Password
+                  אימות סיסמה חדשה
                 </label>
                 <input
                   id="confirm-password"
@@ -117,16 +118,17 @@ export default function UpdatePassword() {
                   autoComplete="new-password"
                   required
                   className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Confirm New Password"
+                  placeholder="אימות סיסמה חדשה"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   minLength={6}
+                  dir="ltr"
                 />
               </div>
             </div>
 
             {error && (
-              <div className="text-sm text-red-600">
+              <div className="text-sm text-red-600 text-right">
                 {error}
               </div>
             )}
@@ -137,7 +139,7 @@ export default function UpdatePassword() {
                 disabled={loading}
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                {loading ? 'Updating password...' : 'Update password'}
+                {loading ? 'מעדכן סיסמה...' : 'עדכן סיסמה'}
               </button>
             </div>
           </form>
