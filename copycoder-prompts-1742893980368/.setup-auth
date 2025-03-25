@@ -9,8 +9,8 @@ npm install @supabase/supabase-js @supabase/ssr
 Always use @supabase/ssr for Next.js 14+ projects.
 
 2. Create a .env.local file in your project root with these variables:
-- NEXT_PUBLIC_SUPABASE_URL=your-project-url
-- NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+- NEXT_PUBLIC_SUPABASE_URL=https://cmcxkyxnldhvxzfwuzvt.supabase.co
+- NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtY3hreXhubGRodnh6Znd1enZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4NTE5MDIsImV4cCI6MjA1ODQyNzkwMn0.TWEPEsn2sLRi_eEu_71_LP353dkS8yqgDZHpB_gGz1k
 
 3. Follow this supabase doc to set up server-side auth:
 @https://supabase.com/docs/guides/auth/server-side/nextjs?queryGroups=router&router=app
