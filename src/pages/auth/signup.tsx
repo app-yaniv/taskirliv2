@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 
 export default function SignUp() {
   const [email, setEmail] = useState('')

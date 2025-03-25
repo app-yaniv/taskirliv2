@@ -12,12 +12,12 @@ export default function Footer() {
           <div>
             <div className="flex items-center mb-4">
               <div className="w-8 h-8 bg-[#5E3EBA] rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">FL</span>
+                <span className="text-white font-bold">TS</span>
               </div>
-              <span className="ml-2 text-xl font-bold">Fat Llama</span>
+              <span className="ml-2 text-xl font-bold">טסקירלי</span>
             </div>
             <p className="text-gray-400 text-sm">
-              The world's largest rental marketplace for anything.
+              השוק הגדול ביותר להשכרת ציוד בישראל.
             </p>
             <div className="flex space-x-4 mt-4">
               <a href="#" className="text-gray-400 hover:text-white">
@@ -37,26 +37,26 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-lg font-semibold mb-4">קישורים מהירים</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/about" className="text-gray-400 hover:text-white">
-                  About Us
+                  אודות
                 </Link>
               </li>
               <li>
                 <Link href="/careers" className="text-gray-400 hover:text-white">
-                  Careers
+                  דרושים
                 </Link>
               </li>
               <li>
                 <Link href="/press" className="text-gray-400 hover:text-white">
-                  Press
+                  עיתונות
                 </Link>
               </li>
               <li>
                 <Link href="/blog" className="text-gray-400 hover:text-white">
-                  Blog
+                  בלוג
                 </Link>
               </li>
             </ul>
@@ -64,26 +64,26 @@ export default function Footer() {
 
           {/* Support */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Support</h3>
+            <h3 className="text-lg font-semibold mb-4">תמיכה</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/help" className="text-gray-400 hover:text-white">
-                  Help Center
+                  מרכז עזרה
                 </Link>
               </li>
               <li>
                 <Link href="/safety" className="text-gray-400 hover:text-white">
-                  Safety
+                  בטיחות
                 </Link>
               </li>
               <li>
                 <Link href="/terms" className="text-gray-400 hover:text-white">
-                  Terms of Service
+                  תנאי שימוש
                 </Link>
               </li>
               <li>
                 <Link href="/privacy" className="text-gray-400 hover:text-white">
-                  Privacy Policy
+                  מדיניות פרטיות
                 </Link>
               </li>
             </ul>
@@ -91,16 +91,16 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Contact</h3>
+            <h3 className="text-lg font-semibold mb-4">צור קשר</h3>
             <ul className="space-y-2">
               <li className="text-gray-400">
-                Email: support@fatllama.com
+                אימייל: support@taskirli.co.il
               </li>
               <li className="text-gray-400">
-                Phone: +1 (555) 123-4567
+                טלפון: +972 (3) 123-4567
               </li>
               <li className="text-gray-400">
-                Address: 123 Llama Street, London, UK
+                כתובת: רחוב הרצל 1, תל אביב, ישראל
               </li>
             </ul>
           </div>
@@ -108,7 +108,7 @@ export default function Footer() {
 
         <div className="mt-8 pt-8 border-t border-gray-800">
           <p className="text-center text-gray-400 text-sm">
-            © {new Date().getFullYear()} Fat Llama. All rights reserved.
+            © {new Date().getFullYear()} טסקירלי. כל הזכויות שמורות.
           </p>
         </div>
       </div>

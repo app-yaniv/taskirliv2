@@ -1,30 +1,27 @@
 import { useEffect } from 'react'
-import { useRouter } from 'next/router'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
 export default function AuthCallback() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const code = searchParams.get('code')
 
   useEffect(() => {
     const handleCallback = async () => {
       const supabase = createClient()
       
-      // Get auth code from URL
-      const code = router.query.code
-
       if (code) {
         // Try to handle the sign in
-        await supabase.auth.exchangeCodeForSession(code as string)
+        await supabase.auth.exchangeCodeForSession(code)
         
         // Redirect to home or intended route
         router.push('/')
       }
     }
 
-    if (router.isReady) {
-      handleCallback()
-    }
-  }, [router.isReady, router.query.code])
+    handleCallback()
+  }, [code, router])
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/router'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
 export default function UpdatePassword() {
@@ -9,6 +9,8 @@ export default function UpdatePassword() {
   const [message, setMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const token = searchParams.get('token')
 
   // Check if we have an active session
   useEffect(() => {
@@ -17,13 +19,13 @@ export default function UpdatePassword() {
       const { data } = await supabase.auth.getSession()
       
       // If no session and no recovery token, redirect to sign in
-      if (!data.session && !router.query.token) {
+      if (!data.session && !token) {
         router.push('/auth/signin')
       }
     }
     
     checkSession()
-  }, [router])
+  }, [router, token])
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault()

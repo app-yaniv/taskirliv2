@@ -6,7 +6,8 @@ alwaysApply: true
 
 # Your rule content
 
-- Do not automatically upload to github unless I tell you so.
+- Do not automatically upload to github unless I explicitly tell you so.
 - Automatically fix linter errors.
 - Always check for errors.
 - Check if there are errors in server or terminal and fix it automatically.
+- Primary Language of the site is Hebrew. The site should be RTL. This is important!

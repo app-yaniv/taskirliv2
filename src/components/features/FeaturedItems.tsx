@@ -1,118 +1,159 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Star, Heart } from 'lucide-react'
-
-const featuredItems = [
-  {
-    id: 1,
-    name: 'מצלמת Sony A7III',
-    price: '₪180/יום',
-    rating: 4.8,
-    reviews: 128,
-    image: 'https://picsum.photos/400/300?random=7',
-    location: 'תל אביב',
-  },
-  {
-    id: 2,
-    name: 'קונטרולר DJ מקצועי',
-    price: '₪140/יום',
-    rating: 4.9,
-    reviews: 89,
-    image: 'https://picsum.photos/400/300?random=8',
-    location: 'חיפה',
-  },
-  {
-    id: 3,
-    name: 'אוהל ל-4 אנשים',
-    price: '₪100/יום',
-    rating: 4.7,
-    reviews: 156,
-    image: 'https://picsum.photos/400/300?random=9',
-    location: 'ירושלים',
-  },
-  {
-    id: 4,
-    name: 'סט כלי עבודה חשמליים',
-    price: '₪60/יום',
-    rating: 4.6,
-    reviews: 234,
-    image: 'https://picsum.photos/400/300?random=10',
-    location: 'באר שבע',
-  },
-  {
-    id: 5,
-    name: 'מערכת הגברה למסיבות',
-    price: '₪160/יום',
-    rating: 4.8,
-    reviews: 167,
-    image: 'https://picsum.photos/400/300?random=11',
-    location: 'רמת גן',
-  },
-  {
-    id: 6,
-    name: 'אופני הרים',
-    price: '₪120/יום',
-    rating: 4.7,
-    reviews: 145,
-    image: 'https://picsum.photos/400/300?random=12',
-    location: 'הרצליה',
-  },
-]
+import { Star, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useUserAuth } from '@/context/UserAuthContext'
+import { useRouter } from 'next/navigation'
 
 export default function FeaturedItems() {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const { isAuthenticated } = useUserAuth()
+  const router = useRouter()
+
+  const featuredItems = [
+    {
+      id: 1,
+      name: 'מצלמת Sony A7III',
+      price: 120,
+      image: '/assets/items/camera.jpg',
+      reviews: 28,
+      rating: 4.9,
+      category: 'מצלמות',
+    },
+    {
+      id: 2,
+      name: 'אוהל קמפינג 4 אנשים',
+      price: 75,
+      image: '/assets/items/tent.jpg',
+      reviews: 42,
+      rating: 4.8,
+      category: 'ציוד קמפינג',
+    },
+    {
+      id: 3,
+      name: 'קונסולת PlayStation 5',
+      price: 85,
+      image: '/assets/items/ps5.jpg',
+      reviews: 36,
+      rating: 4.7,
+      category: 'אלקטרוניקה',
+    },
+    {
+      id: 4,
+      name: 'תרמיל גב מקצועי',
+      price: 30,
+      image: '/assets/items/backpack.jpg',
+      reviews: 19,
+      rating: 4.6,
+      category: 'ציוד טיולים',
+    },
+    {
+      id: 5,
+      name: 'מקדחה חשמלית',
+      price: 45,
+      image: '/assets/items/drill.jpg',
+      reviews: 57,
+      rating: 4.8,
+      category: 'כלי עבודה',
+    },
+  ]
+
+  const itemsToShow = 3 // Number of items to show at once
+  const maxIndex = featuredItems.length - itemsToShow
+
+  const handlePrev = () => {
+    setCurrentIndex(prev => Math.max(0, prev - 1))
+  }
+
+  const handleNext = () => {
+    setCurrentIndex(prev => Math.min(maxIndex, prev + 1))
+  }
+
+  const handleRentClick = (itemId: number) => {
+    if (isAuthenticated) {
+      // If authenticated, go directly to the rental page
+      router.push(`/rent/${itemId}`)
+    } else {
+      // If not authenticated, redirect to signin with a redirect back to the item
+      router.push(`/auth/signin?redirectedFrom=/rent/${itemId}`)
+    }
+  }
+
   return (
-    <section className="py-12">
+    <section id="featured-items" className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-            פריטים מובילים
-          </h2>
-          <p className="mt-4 text-lg text-gray-500">
-            בדוק את הפריטים הפופולריים ביותר להשכרה
-          </p>
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold text-gray-900">פריטים מובילים</h2>
+          <p className="mt-2 text-gray-600">בדוק את הפריטים הפופולריים ביותר להשכרה</p>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {featuredItems.map((item) => (
-            <div
-              key={item.id}
-              className="group relative bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
+        <div className="relative">
+          <div className="flex overflow-hidden">
+            <div 
+              className="flex transition-transform duration-300 ease-in-out space-x-6 space-x-reverse"
+              style={{ transform: `translateX(${currentIndex * 25}%)` }}
             >
-              <div className="relative h-48">
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-200"
-                />
-                <button className="absolute top-2 left-2 p-2 rounded-full bg-white/80 hover:bg-white transition-colors duration-200">
-                  <Heart className="h-5 w-5 text-gray-600" />
-                </button>
-              </div>
-              <div className="p-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-900">{item.name}</h3>
-                  <span className="text-lg font-semibold text-[#5E3EBA]">{item.price}</span>
-                </div>
-                <div className="mt-2 flex items-center">
-                  <div className="flex items-center">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="mr-1 text-sm text-gray-600">{item.rating}</span>
-                    <span className="mr-1 text-sm text-gray-500">({item.reviews} ביקורות)</span>
-                  </div>
-                  <span className="mr-4 text-sm text-gray-500">{item.location}</span>
-                </div>
-                <Link
-                  href={`/product/${item.id}`}
-                  className="mt-4 block w-full text-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#5E3EBA] hover:bg-[#4A2F9E]"
+              {featuredItems.map((item) => (
+                <div 
+                  key={item.id} 
+                  className="flex-none w-full sm:w-1/2 md:w-1/3 lg:w-1/3 p-4"
                 >
-                  פרטים נוספים
-                </Link>
-              </div>
+                  <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <div className="relative h-48">
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="absolute top-2 right-2 bg-white/80 text-sm font-medium text-gray-900 py-1 px-2 rounded">
+                        {item.category}
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-bold text-lg text-gray-900 mb-1">{item.name}</h3>
+                      <div className="flex items-center mb-2">
+                        <Star className="h-4 w-4 text-yellow-400 ml-1" />
+                        <span className="text-sm font-medium text-gray-900">{item.rating}</span>
+                        <span className="text-sm text-gray-500 mr-1">({item.reviews} ביקורות)</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-gray-900">₪{item.price} / יום</span>
+                        <button 
+                          onClick={() => handleRentClick(item.id)}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                        >
+                          השכר עכשיו
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+          
+          {currentIndex > 0 && (
+            <button 
+              onClick={handlePrev}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100"
+              aria-label="Previous"
+            >
+              <ChevronLeft className="h-6 w-6 text-gray-600" />
+            </button>
+          )}
+          
+          {currentIndex < maxIndex && (
+            <button 
+              onClick={handleNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100"
+              aria-label="Next"
+            >
+              <ChevronRight className="h-6 w-6 text-gray-600" />
+            </button>
+          )}
         </div>
       </div>
     </section>

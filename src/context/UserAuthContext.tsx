@@ -1,6 +1,8 @@
+'use client'
+
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import type { User, Session } from '@supabase/supabase-js'
 
 type UserAuthContextType = {
@@ -27,6 +29,7 @@ export const UserAuthProvider: React.FC<{
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     // Get current session on initial load
@@ -34,6 +37,7 @@ export const UserAuthProvider: React.FC<{
       const { data: { session }, error } = await supabase.auth.getSession()
       if (error) {
         console.error('Error getting session:', error.message)
+        setError('שגיאה בהתחברות. אנא בדוק את פרטי ההתחברות שלך.')
       }
       setSession(session)
       setUser(session?.user ?? null)
@@ -58,7 +62,9 @@ export const UserAuthProvider: React.FC<{
 
   const signOut = async () => {
     await supabase.auth.signOut()
-    router.push('/auth/signin')
+    // Instead of redirecting to the sign-in page, stay on the current page or go home
+    // allowing the user to continue browsing as a guest
+    router.push('/')
   }
 
   const value = {

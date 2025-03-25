@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import { useRouter } from 'next/router'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
@@ -10,7 +9,8 @@ export default function SignIn() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const redirectTo = router.query.redirectedFrom as string || '/'
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirectedFrom') || '/'
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
