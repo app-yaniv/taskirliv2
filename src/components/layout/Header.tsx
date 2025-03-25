@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useUserAuth } from '@/context/UserAuthContext'
 import { Menu, X, User, LogOut, ChevronDown } from 'lucide-react'
@@ -9,6 +9,24 @@ const Header = () => {
   const { user, signOut, isAuthenticated } = useUserAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  // Add ref for the dropdown
+  const dropdownRef = React.useRef<HTMLDivElement>(null)
+
+  // Add click outside handler
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsProfileMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -16,6 +34,22 @@ const Header = () => {
 
   const toggleProfileMenu = () => {
     setIsProfileMenuOpen(!isProfileMenuOpen)
+  }
+
+  const handleSignOut = async (e: React.MouseEvent) => {
+    e.preventDefault() // Prevent any default button behavior
+    if (isLoggingOut) return // Prevent multiple clicks
+    
+    setIsLoggingOut(true)
+    try {
+      await signOut()
+      setIsProfileMenuOpen(false)
+    } catch (error) {
+      console.error('Error signing out:', error)
+      alert('התנתקות נכשלה. אנא נסה שוב.')
+    } finally {
+      setIsLoggingOut(false)
+    }
   }
 
   // Helper function to truncate email if it's too long
@@ -48,7 +82,7 @@ const Header = () => {
             
             {/* Auth Buttons */}
             {isAuthenticated ? (
-              <div className="relative ml-3 sm:mr-4">
+              <div className="relative ml-3 sm:mr-4" ref={dropdownRef}>
                 <button
                   onClick={toggleProfileMenu}
                   className="flex items-center px-3 py-1.5 text-sm font-medium text-gray-800 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none"
@@ -68,11 +102,12 @@ const Header = () => {
                       הגדרות
                     </Link>
                     <button
-                      onClick={signOut}
-                      className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={handleSignOut}
+                      disabled={isLoggingOut}
+                      className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                     >
                       <LogOut className="h-4 w-4 ml-2" />
-                      התנתק
+                      <span className="flex-1 text-right">{isLoggingOut ? 'מתנתק...' : 'התנתק'}</span>
                     </button>
                   </div>
                 )}
@@ -151,11 +186,12 @@ const Header = () => {
                   הגדרות
                 </Link>
                 <button
-                  onClick={signOut}
-                  className="flex w-full items-center px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-600"
+                  onClick={handleSignOut}
+                  disabled={isLoggingOut}
+                  className="flex w-full items-center px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-600 disabled:opacity-50"
                 >
                   <LogOut className="h-5 w-5 ml-2" />
-                  התנתק
+                  <span className="flex-1 text-right">{isLoggingOut ? 'מתנתק...' : 'התנתק'}</span>
                 </button>
               </>
             ) : (

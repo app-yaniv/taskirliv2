@@ -61,10 +61,29 @@ export const UserAuthProvider: React.FC<{
   }, [])
 
   const signOut = async () => {
-    await supabase.auth.signOut()
-    // Instead of redirecting to the sign-in page, stay on the current page or go home
-    // allowing the user to continue browsing as a guest
-    router.push('/')
+    try {
+      const supabase = createClient()
+      
+      // Sign out from Supabase first
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error('Error signing out:', error.message)
+        throw error
+      }
+
+      // Clear local state
+      setUser(null)
+      setSession(null)
+      
+      // Clear any stored auth data
+      localStorage.removeItem('supabase.auth.token')
+      
+      // Force a complete page reload to clear all state
+      window.location.replace('/')
+    } catch (error: any) {
+      console.error('Error during sign out:', error.message)
+      throw error
+    }
   }
 
   const value = {
