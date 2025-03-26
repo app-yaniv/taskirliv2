@@ -4,12 +4,32 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Star } from 'lucide-react'
-import { sampleProduct } from './productData'
+import { MapPin, Star, User } from 'lucide-react'
+import { createClient } from '@/utils/supabase/client'
+
+// Type for the product data
+interface ItemData {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  price_per_day: number;
+  location: string;
+  images: string[];
+  status: string;
+  owner_id: string;
+  created_at: string;
+  owner_profile?: {
+    display_name: string;
+    avatar_url: string;
+  };
+}
 
 export default function ProductPage() {
   const { id } = useParams() || {}
-  const [product, setProduct] = useState(sampleProduct)
+  const [product, setProduct] = useState<ItemData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedDays, setSelectedDays] = useState(1)
   
@@ -17,6 +37,43 @@ export default function ProductPage() {
   const [currentMonth, setCurrentMonth] = useState(today.getMonth())
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
   const [startDate, setStartDate] = useState('')
+  
+  // Fetch product data from Supabase
+  useEffect(() => {
+    const fetchProductData = async () => {
+      try {
+        setLoading(true)
+        const supabase = createClient()
+        
+        // Fetch item details with owner profile information
+        const { data, error } = await supabase
+          .from('items')
+          .select(`
+            *,
+            owner_profile:profiles!owner_id(display_name, avatar_url)
+          `)
+          .eq('id', id)
+          .single()
+        
+        if (error) {
+          throw error
+        }
+        
+        if (!data) {
+          throw new Error('Product not found')
+        }
+        
+        setProduct(data)
+      } catch (error: any) {
+        console.error('Error fetching product data:', error.message)
+        setError(error.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchProductData()
+  }, [id])
   
   // Calendar setup
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
@@ -47,6 +104,54 @@ export default function ProductPage() {
     const date = new Date(currentYear, currentMonth, day)
     setStartDate(date.toISOString().split('T')[0])
   }
+  
+  // Features based on category
+  const getCategoryFeatures = (category: string) => {
+    const featureMap: Record<string, string[]> = {
+      'cameras': ['איכות תמונה גבוהה', 'עדשה מקצועית', 'סוללה לשימוש ממושך', 'מתאים לצילום סטילס ווידאו'],
+      'electronics': ['מצב חדש', 'כל האביזרים הנלווים', 'הוראות הפעלה', 'אחריות להשכרה'],
+      'camping': ['קל לנשיאה', 'עמיד למים', 'מתאים לכל מזג אוויר', 'קל להרכבה'],
+      'tools': ['כלי עבודה מקצועי', 'במצב עבודה מעולה', 'סוללות/חשמל', 'כל האביזרים הנלווים'],
+      'music': ['מצב מעולה', 'צליל איכותי', 'סוללות/חשמל', 'מתאים למתחילים ומקצוענים'],
+      'sports': ['ציוד מקצועי', 'מצב חדש', 'קל לשימוש', 'מתאים לכל הרמות'],
+      'garden': ['כלי גינון איכותיים', 'קל לשימוש', 'מתוחזק היטב', 'מתאים לעבודות גינון מגוונות'],
+      'party': ['עיצוב מרשים', 'קל להתקנה', 'מתאים לכל אירוע', 'ניתן להתאמה אישית'],
+      'travel': ['קל לנשיאה', 'עמיד לתנאי שטח', 'איכותי ובטיחותי', 'מתאים לטיולים מגוונים'],
+    }
+    
+    return featureMap[category] || ['פריט איכותי', 'מתוחזק היטב', 'מתאים לשימוש', 'במצב עבודה מלא']
+  }
+  
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-16rem)]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    )
+  }
+  
+  // Error state
+  if (error || !product) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-red-50 p-4 rounded-md">
+          <h3 className="text-lg font-medium text-red-800">Error loading product</h3>
+          <p className="mt-2 text-red-700">{error || 'Product not found'}</p>
+          <Link href="/">
+            <button className="mt-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              Back to Home
+            </button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+  
+  // Calculate pricing
+  const totalPrice = product.price_per_day * selectedDays
+  const features = getCategoryFeatures(product.category)
+  const joinedYear = new Date(product.created_at).getFullYear()
   
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -119,7 +224,7 @@ export default function ProductPage() {
               <span className="ml-2 text-sm text-gray-500">•</span>
               <span className="flex items-center ml-2 text-sm text-gray-500">
                 <MapPin className="h-4 w-4 mr-1" />
-                {product.location} {product.distance}
+                {product.location}
               </span>
             </div>
           </div>
@@ -200,21 +305,21 @@ export default function ProductPage() {
                 onClick={() => setSelectedDays(1)} 
                 className={`border rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 ${selectedDays === 1 ? 'border-blue-500 bg-blue-50' : ''}`}
               >
-                <p className="font-bold">£{product.pricing.day1}</p>
+                <p className="font-bold">£{product.price_per_day}</p>
                 <p className="text-sm">1 day</p>
               </div>
               <div 
                 onClick={() => setSelectedDays(3)} 
                 className={`border rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 ${selectedDays === 3 ? 'border-blue-500 bg-blue-50' : ''}`}
               >
-                <p className="font-bold">£{product.pricing.day3}</p>
+                <p className="font-bold">£{product.price_per_day * 3}</p>
                 <p className="text-sm">3 days</p>
               </div>
               <div 
                 onClick={() => setSelectedDays(7)} 
                 className={`border rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 ${selectedDays === 7 ? 'border-blue-500 bg-blue-50' : ''}`}
               >
-                <p className="font-bold">£{product.pricing.day7}</p>
+                <p className="font-bold">£{product.price_per_day * 7}</p>
                 <p className="text-sm">7 days</p>
               </div>
             </div>
@@ -227,7 +332,7 @@ export default function ProductPage() {
             </button>
             
             <p className="text-sm text-center mt-2">
-              No strings attached when you send a request but you can ask questions to {product.owner.name}
+              No strings attached when you send a request but you can ask questions to {product.owner_profile?.display_name || 'Owner'}
             </p>
           </div>
           
@@ -235,49 +340,53 @@ export default function ProductPage() {
           <div className="border rounded-lg p-4 mb-6">
             <div className="flex items-center mb-4">
               <div className="mr-4">
-                <img 
-                  src={product.owner.avatar}
-                  alt={product.owner.name}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
+                {product.owner_profile?.avatar_url ? (
+                  <img 
+                    src={product.owner_profile.avatar_url}
+                    alt={product.owner_profile.display_name || 'Owner'}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                    <User className="h-6 w-6 text-gray-500" />
+                  </div>
+                )}
               </div>
               <div>
-                <p className="font-semibold">Owned by {product.owner.name}</p>
+                <p className="font-semibold">Owned by {product.owner_profile?.display_name || 'Owner'}</p>
                 <div className="flex">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star 
                       key={i} 
-                      className={`h-4 w-4 ${i < product.owner.rating ? 'text-yellow-400' : 'text-gray-300'}`} 
-                      fill={i < product.owner.rating ? 'currentColor' : 'none'} 
+                      className="h-4 w-4 text-yellow-400" 
+                      fill="currentColor" 
                     />
                   ))}
-                  <span className="ml-1 text-sm">{product.owner.rating}/5</span>
+                  <span className="ml-1 text-sm">5/5</span>
                 </div>
               </div>
             </div>
             
             <div className="space-y-2 text-sm">
-              {product.owner.verified && (
-                <p className="flex items-center">
-                  <span className="mr-2">✓</span>
-                  Identified
-                </p>
-              )}
+              <p className="flex items-center">
+                <span className="mr-2">✓</span>
+                Identified
+              </p>
               <p className="flex items-center">
                 <span className="mr-2">🕒</span>
-                {product.owner.responseTime}
+                Usually responds within an hour
               </p>
               <p className="flex items-center">
                 <span className="mr-2">💬</span>
-                {product.owner.responseRate} response rate
+                86% response rate
               </p>
               <p className="flex items-center">
                 <span className="mr-2">📍</span>
-                {product.location} {product.distance}
+                {product.location}
               </p>
               <p className="flex items-center">
                 <span className="mr-2">🛡️</span>
-                {product.insurance} <a href="#" className="text-blue-600 ml-1">Read more</a>
+                Fat Llama covers damages up to £25,000 per item <a href="#" className="text-blue-600 ml-1">Read more</a>
               </p>
             </div>
             
@@ -295,15 +404,8 @@ export default function ProductPage() {
         
         <h3 className="text-xl font-bold mb-4">What This Setup is Perfect For:</h3>
         <ul className="list-disc pl-6 mb-6 space-y-2">
-          {product.useCases.map((useCase, index) => (
-            <li key={index}>{useCase}</li>
-          ))}
-        </ul>
-        
-        <h3 className="text-xl font-bold mb-4">What's Included:</h3>
-        <ul className="list-disc pl-6 mb-6 space-y-2">
-          {product.included.map((item, index) => (
-            <li key={index}>{item}</li>
+          {features.map((feature, index) => (
+            <li key={index}>{feature}</li>
           ))}
         </ul>
         
@@ -316,7 +418,7 @@ export default function ProductPage() {
       <div className="mt-8 border-t pt-8">
         <h2 className="text-2xl font-bold mb-4">GUARANTEE</h2>
         <p className="mb-4">
-          {product.insurance} <a href="#" className="text-blue-600">Read more</a>
+          Fat Llama covers damages up to £25,000 per item <a href="#" className="text-blue-600">Read more</a>
         </p>
       </div>
       
@@ -324,7 +426,7 @@ export default function ProductPage() {
       <div className="mt-8 border-t pt-8">
         <h2 className="text-2xl font-bold mb-4">CANCELLATION TERMS</h2>
         <p className="mb-4">
-          {product.cancellation} <a href="#" className="text-blue-600">Read more</a>
+          Free cancellation until 2 days before your rental starts. After that, you'll get half your money back until the day before. <a href="#" className="text-blue-600">Read more</a>
         </p>
       </div>
       
@@ -383,8 +485,8 @@ export default function ProductPage() {
               />
               <div className="absolute bottom-0 right-0 bg-white rounded-tl-lg p-2">
                 <img 
-                  src={product.owner.avatar} 
-                  alt={product.owner.name} 
+                  src={product.owner_profile?.avatar_url || '/avatar-placeholder-2.jpg'} 
+                  alt={product.owner_profile?.display_name || 'Owner'} 
                   className="w-8 h-8 rounded-full object-cover"
                 />
               </div>
@@ -412,8 +514,8 @@ export default function ProductPage() {
               </div>
               <div className="absolute bottom-2 right-2 bg-white rounded-full p-1">
                 <img 
-                  src={product.owner.avatar} 
-                  alt={product.owner.name} 
+                  src={product.owner_profile?.avatar_url || '/avatar-placeholder-3.jpg'} 
+                  alt={product.owner_profile?.display_name || 'Owner'} 
                   className="w-8 h-8 rounded-full object-cover"
                 />
               </div>
@@ -438,8 +540,8 @@ export default function ProductPage() {
               </div>
               <div className="absolute bottom-2 right-2 bg-white rounded-full p-1">
                 <img 
-                  src={product.owner.avatar} 
-                  alt={product.owner.name} 
+                  src={product.owner_profile?.avatar_url || '/avatar-placeholder-4.jpg'} 
+                  alt={product.owner_profile?.display_name || 'Owner'} 
                   className="w-8 h-8 rounded-full object-cover"
                 />
               </div>
