@@ -5,8 +5,8 @@ import { User, Session, AuthChangeEvent } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
 import { getUserProfile, Profile, updateUserProfile } from '@/utils/supabase/profile'
 
-// Increase timeout to 15 seconds for slow backend connections
-const PROFILE_LOADING_TIMEOUT = 15000; // 15 seconds
+// Reduce timeout to 5 seconds since we've optimized the loading
+const PROFILE_LOADING_TIMEOUT = 5000; // 5 seconds
 
 export type UserAuthContextType = {
   user: User | null

@@ -13,14 +13,8 @@ export default function Home() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      // Use display_name if available, otherwise fallback to email username
-      let name = profile?.display_name || '';
-      
-      if (!name && user.email) {
-        // If no display name, get the first part of the email before the @ symbol
-        name = user.email.split('@')[0];
-      }
-      
+      // Get display name, full name, or email username in that order
+      const name = profile?.display_name || profile?.full_name || user.email?.split('@')[0] || ''
       setGreeting(`שלום ${name}, ברוך הבא חזרה!`)
     }
   }, [isAuthenticated, user, profile])

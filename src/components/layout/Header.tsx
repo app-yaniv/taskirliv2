@@ -52,15 +52,11 @@ const Header = () => {
     }
   }
 
-  // Get the display name or fallback to email
-  const getUserDisplayName = () => {
-    // If display_name is available, use it
-    if (profile?.display_name) {
-      return profile.display_name;
-    }
-    
-    // Otherwise fallback to truncated email
-    return truncateEmail(user?.email || '');
+  // Helper function to get display name
+  const getDisplayName = () => {
+    if (profile?.display_name) return profile.display_name
+    if (profile?.full_name) return profile.full_name
+    return truncateEmail(user?.email || '')
   }
 
   // Helper function to truncate email if it's too long
@@ -99,7 +95,7 @@ const Header = () => {
                   className="flex items-center px-3 py-1.5 text-sm font-medium text-gray-800 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none"
                 >
                   <User className="h-4 w-4 ml-2" />
-                  <span>{getUserDisplayName()}</span>
+                  <span>{getDisplayName()}</span>
                   <ChevronDown className="h-4 w-4 mr-1" />
                 </button>
                 
