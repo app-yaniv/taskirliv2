@@ -31,13 +31,6 @@ type ItemData = {
   }
 }
 
-// Add generateStaticParams function for static site generation
-export async function generateStaticParams() {
-  // For static export, we'll use a dummy ID
-  // This is needed because Next.js requires this function for static export
-  return [{ id: 'placeholder' }]
-}
-
 export default function RentalDetail({ params }: RentalItemProps) {
   const { id } = params
   const { user, isAuthenticated, isLoading } = useUserAuth()
