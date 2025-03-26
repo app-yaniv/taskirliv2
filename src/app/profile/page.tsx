@@ -9,13 +9,10 @@ import {
   HelpCircle, 
   MessageCircle, 
   Settings, 
-  Moon, 
-  Sun, 
-  Info, 
   Bell, 
   Lock 
 } from 'lucide-react'
-import { createClient } from '@/utils/supabase/client'
+import dynamic from 'next/dynamic'
 
 // Settings section component
 const SettingsSection = ({ title, children }: { title: string, children: React.ReactNode }) => {
@@ -65,48 +62,63 @@ const SettingsItem = ({
   );
 };
 
-export default function Profile() {
-  const { user, isLoading, isAuthenticated, signOut, updateUserMetadata } = useUserAuth()
+function ProfileContent() {
+  console.log("🔄 Profile page component rendering");
+  const { user, profile, isLoading, isAuthenticated, signOut, updateProfile } = useUserAuth()
+  console.log("📊 Profile page auth state:", { isLoading, isAuthenticated, hasUser: !!user, hasProfile: !!profile });
+  
   const router = useRouter()
   const [displayName, setDisplayName] = useState('')
+  const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
-  const [isEditing, setIsEditing] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [activeSection, setActiveSection] = useState<'profile' | 'edit'>('profile')
   const [isSaving, setIsSaving] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isClient) return
+    
+    console.log("🔍 Profile page - Auth state effect running", { isLoading, isAuthenticated });
     if (!isLoading && !isAuthenticated) {
+      console.log("🚫 Not authenticated, redirecting to signin");
       router.push('/auth/signin?redirectedFrom=/profile')
     }
-  }, [isLoading, isAuthenticated, router])
+  }, [isLoading, isAuthenticated, router, isClient])
 
   useEffect(() => {
-    if (user) {
-      console.log('User metadata from context:', user.user_metadata)
-      setDisplayName(user.user_metadata?.name || '')
-      setPhone(user.user_metadata?.phone || '')
+    if (!isClient) return
+    
+    console.log("🔍 Profile page - Profile data effect running", { profile });
+    if (profile) {
+      console.log("📋 Setting profile data fields:", { 
+        display_name: profile.display_name, 
+        full_name: profile.full_name,
+        phone: profile.phone
+      });
+      setDisplayName(profile.display_name || '')
+      setFullName(profile.full_name || '')
+      setPhone(profile.phone || '')
     }
-  }, [user])
+  }, [profile, isClient])
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSaving(true)
+    console.log("💾 Saving profile data:", { displayName, fullName, phone });
     
     try {
-      console.log('Sending profile update:', { name: displayName, phone: phone })
-      
-      const { success, error } = await updateUserMetadata({
-        name: displayName,
-        phone: phone,
+      await updateProfile({
+        display_name: displayName,
+        full_name: fullName,
+        phone
       })
       
-      console.log('Profile update result:', { success, error })
-      
-      if (!success) {
-        throw new Error(error)
-      }
-      
+      console.log("✅ Profile saved successfully");
       setMessage({ type: 'success', text: 'הפרופיל עודכן בהצלחה' })
       setActiveSection('profile')
       
@@ -114,26 +126,40 @@ export default function Profile() {
         setMessage(null)
       }, 3000)
     } catch (error: any) {
-      console.error('Error updating profile:', error.message)
-      setMessage({ type: 'error', text: `אירעה שגיאה בעדכון הפרופיל: ${error.message}` })
+      console.error('❌ Error updating profile:', error)
+      setMessage({ type: 'error', text: 'אירעה שגיאה בעדכון הפרופיל' })
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleEditClick = () => {
+    console.log("✏️ Edit button clicked");
     setActiveSection('edit')
   }
 
   const handleCancelEdit = () => {
+    console.log("❌ Cancel edit button clicked");
     setActiveSection('profile')
   }
 
   const navigateTo = (path: string) => {
+    console.log(`🔀 Navigating to: ${path}`);
     router.push(path)
   }
 
+  console.log("🎬 Profile page render state:", { isLoading, isAuthenticated });
+  
+  if (!isClient) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-16rem)]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    )
+  }
+  
   if (isLoading) {
+    console.log("⏳ Showing loading spinner");
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-16rem)]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -142,9 +168,11 @@ export default function Profile() {
   }
 
   if (!isAuthenticated) {
+    console.log("🚫 Not authenticated, returning null");
     return null
   }
 
+  console.log("✅ Rendering profile content");
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 bg-gray-100 min-h-screen">
       <div className="flex items-center justify-between mb-8">
@@ -170,8 +198,9 @@ export default function Profile() {
           <div className="bg-white shadow rounded-lg p-6 mb-8">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-xl font-semibold">{displayName || 'שם משתמש'}</h2>
+                <h2 className="text-xl font-semibold">{displayName || fullName || 'שם משתמש'}</h2>
                 <p className="text-gray-600">{phone || 'לא צוין'}</p>
+                {user?.email && <p className="text-gray-500 text-sm">{user.email}</p>}
               </div>
               <button
                 onClick={handleEditClick}
@@ -223,12 +252,23 @@ export default function Profile() {
           <form onSubmit={handleSaveProfile}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                שם מלא
+                שם תצוגה
               </label>
               <input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                שם מלא
+              </label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -241,6 +281,7 @@ export default function Profile() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                dir="ltr"
               />
             </div>
             <div className="flex justify-end gap-2">
@@ -248,20 +289,29 @@ export default function Profile() {
                 type="button"
                 onClick={handleCancelEdit}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                disabled={isSaving}
               >
                 ביטול
               </button>
               <button
                 type="submit"
+                className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                 disabled={isSaving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
-                {isSaving ? 'שומר...' : 'שמור'}
+                {isSaving ? (
+                  <span className="flex items-center">
+                    <span className="inline-block w-4 h-4 ml-2 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    שומר...
+                  </span>
+                ) : 'שמור'}
               </button>
             </div>
           </form>
         </div>
       )}
     </div>
-  )
-} 
+  );
+}
+
+// Export a client-only version of the profile component to avoid hydration issues
+export default dynamic(() => Promise.resolve(ProfileContent), { ssr: false }); 

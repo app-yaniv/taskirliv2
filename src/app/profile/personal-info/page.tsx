@@ -5,43 +5,67 @@ import { useRouter } from 'next/navigation'
 import { useUserAuth } from '@/context/UserAuthContext'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import { updateUserProfile } from '@/utils/supabase/profile'
+import dynamic from 'next/dynamic'
 
-export default function PersonalInfoPage() {
-  const { user, isLoading, isAuthenticated } = useUserAuth()
+function PersonalInfoContent() {
+  const { user, profile, isLoading, isAuthenticated, updateProfile } = useUserAuth()
   const router = useRouter()
   const [displayName, setDisplayName] = useState('')
+  const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
+  const [alternativeEmail, setAlternativeEmail] = useState('')
+  const [addressStreet, setAddressStreet] = useState('')
+  const [addressCity, setAddressCity] = useState('')
+  const [addressState, setAddressState] = useState('')
+  const [addressPostalCode, setAddressPostalCode] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isClient) return
+    
     if (!isLoading && !isAuthenticated) {
       router.push('/auth/signin?redirectedFrom=/profile/personal-info')
     }
-  }, [isLoading, isAuthenticated, router])
+  }, [isLoading, isAuthenticated, router, isClient])
 
-  // Loading profile data from user metadata
+  // Loading profile data
   useEffect(() => {
-    if (user) {
-      setDisplayName(user.user_metadata?.name || '')
-      setPhone(user.user_metadata?.phone || '')
+    if (!isClient) return
+    
+    if (profile) {
+      setDisplayName(profile.display_name || '')
+      setFullName(profile.full_name || '')
+      setPhone(profile.phone || '')
+      setAlternativeEmail(profile.alternative_email || '')
+      setAddressStreet(profile.address_street || '')
+      setAddressCity(profile.address_city || '')
+      setAddressState(profile.address_state || '')
+      setAddressPostalCode(profile.address_postal_code || '')
     }
-  }, [user])
+  }, [profile, isClient])
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSaving(true)
     
     try {
-      // Update user metadata in Supabase
-      const { error } = await updateUserProfile({
-        name: displayName,
-        phone
+      await updateProfile({
+        display_name: displayName,
+        full_name: fullName,
+        phone,
+        alternative_email: alternativeEmail,
+        address_street: addressStreet,
+        address_city: addressCity,
+        address_state: addressState,
+        address_postal_code: addressPostalCode
       })
-      
-      if (error) throw error
       
       setMessage({ type: 'success', text: 'הפרופיל עודכן בהצלחה' })
       setIsEditing(false)
@@ -56,6 +80,14 @@ export default function PersonalInfoPage() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  if (!isClient) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-16rem)]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    )
   }
 
   if (isLoading) {
@@ -119,13 +151,13 @@ export default function PersonalInfoPage() {
                     className="bg-gray-100 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                     value={user?.email || ''}
                   />
-                  <p className="mt-1 text-xs text-gray-500">לא ניתן לשנות את כתובת האימייל.</p>
+                  <p className="mt-1 text-xs text-gray-500">לא ניתן לשנות את כתובת האימייל הראשית.</p>
                 </div>
               </div>
 
               <div>
                 <label htmlFor="displayName" className="block text-sm font-medium text-gray-700">
-                  שם מלא
+                  שם תצוגה
                 </label>
                 <div className="mt-1">
                   <input
@@ -135,6 +167,22 @@ export default function PersonalInfoPage() {
                     className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+                  שם מלא
+                </label>
+                <div className="mt-1">
+                  <input
+                    type="text"
+                    name="fullName"
+                    id="fullName"
+                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                   />
                 </div>
               </div>
@@ -156,18 +204,106 @@ export default function PersonalInfoPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-3 space-x-reverse">
+              <div>
+                <label htmlFor="alternativeEmail" className="block text-sm font-medium text-gray-700">
+                  כתובת אימייל חלופית
+                </label>
+                <div className="mt-1">
+                  <input
+                    type="email"
+                    name="alternativeEmail"
+                    id="alternativeEmail"
+                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                    value={alternativeEmail}
+                    onChange={(e) => setAlternativeEmail(e.target.value)}
+                    dir="ltr"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-gray-900">כתובת</h3>
+                
+                <div>
+                  <label htmlFor="addressStreet" className="block text-sm font-medium text-gray-700">
+                    רחוב ומספר
+                  </label>
+                  <div className="mt-1">
+                    <input
+                      type="text"
+                      name="addressStreet"
+                      id="addressStreet"
+                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                      value={addressStreet}
+                      onChange={(e) => setAddressStreet(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="addressCity" className="block text-sm font-medium text-gray-700">
+                    עיר
+                  </label>
+                  <div className="mt-1">
+                    <input
+                      type="text"
+                      name="addressCity"
+                      id="addressCity"
+                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                      value={addressCity}
+                      onChange={(e) => setAddressCity(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="addressState" className="block text-sm font-medium text-gray-700">
+                      מחוז
+                    </label>
+                    <div className="mt-1">
+                      <input
+                        type="text"
+                        name="addressState"
+                        id="addressState"
+                        className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        value={addressState}
+                        onChange={(e) => setAddressState(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="addressPostalCode" className="block text-sm font-medium text-gray-700">
+                      מיקוד
+                    </label>
+                    <div className="mt-1">
+                      <input
+                        type="text"
+                        name="addressPostalCode"
+                        id="addressPostalCode"
+                        className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md text-right"
+                        value={addressPostalCode}
+                        onChange={(e) => setAddressPostalCode(e.target.value)}
+                        dir="ltr"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   disabled={isSaving}
                 >
                   ביטול
                 </button>
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   disabled={isSaving}
                 >
                   {isSaving ? (
@@ -188,18 +324,45 @@ export default function PersonalInfoPage() {
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{user?.email}</dd>
               </div>
               <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">שם מלא</dt>
+                <dt className="text-sm font-medium text-gray-500">שם תצוגה</dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                   {displayName || 'לא הוגדר'}
                 </dd>
               </div>
               <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">שם מלא</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  {fullName || 'לא הוגדר'}
+                </dd>
+              </div>
+              <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">מספר טלפון</dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 text-right" dir="ltr">
                   {phone || 'לא הוגדר'}
                 </dd>
               </div>
+              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">אימייל חלופי</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 text-right" dir="ltr">
+                  {alternativeEmail || 'לא הוגדר'}
+                </dd>
+              </div>
               <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">כתובת</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  {addressStreet ? (
+                    <>
+                      {addressStreet}
+                      {addressCity && <>, {addressCity}</>}
+                      {addressState && <>, {addressState}</>}
+                      {addressPostalCode && <> {addressPostalCode}</>}
+                    </>
+                  ) : (
+                    'לא הוגדרה'
+                  )}
+                </dd>
+              </div>
+              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">הצטרף בתאריך</dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                   {user?.created_at ? new Date(user.created_at).toLocaleDateString('he-IL') : 'לא זמין'}
@@ -211,4 +374,7 @@ export default function PersonalInfoPage() {
       </div>
     </div>
   )
-} 
+}
+
+// Export a client-only version of the component to avoid hydration errors
+export default dynamic(() => Promise.resolve(PersonalInfoContent), { ssr: false }); 
