@@ -28,7 +28,7 @@ export default function Dashboard() {
   const supabase = createClient()
   
   const [bookings, setBookings] = useState<Booking[]>([])
-  const [myRentals, setMyRentals] = useState<Booking[]>([])
+  const [rentals, setRentals] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -68,7 +68,7 @@ export default function Dashboard() {
       if (itemsError) throw itemsError
       
       if (userItems && userItems.length > 0) {
-        const itemIds = userItems.map(item => item.id)
+        const itemIds = userItems.map((item: { id: string }) => item.id)
         
         const { data: rentalsOfMyItems, error: rentalsError } = await supabase
           .from('bookings')
@@ -81,7 +81,7 @@ export default function Dashboard() {
         
         if (rentalsError) throw rentalsError
         
-        setMyRentals(rentalsOfMyItems || [])
+        setRentals(rentalsOfMyItems || [])
       }
       
       setBookings(userBookings || [])
@@ -308,13 +308,13 @@ export default function Dashboard() {
           <p className="mt-1 max-w-2xl text-sm text-gray-500">פריטים שלך שאחרים שוכרים.</p>
         </div>
         
-        {myRentals.length === 0 ? (
+        {rentals.length === 0 ? (
           <div className="border-t border-gray-200 px-4 py-5 sm:px-6 text-center">
             <p className="text-gray-500">אין הזמנות השכרה לפריטים שלך כרגע.</p>
           </div>
         ) : (
           <ul className="divide-y divide-gray-200">
-            {myRentals.map((rental) => (
+            {rentals.map((rental) => (
               <li key={rental.id} className="px-4 py-4 sm:px-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
