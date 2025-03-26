@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { Star, MapPin, Calendar, Clock, User, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
+import SafeImage from '@/components/ui/SafeImage'
 
 interface RentalItemProps {
   params: {
@@ -44,6 +45,8 @@ export default function RentalDetail({ params }: RentalItemProps) {
   const [rentalDays, setRentalDays] = useState(1)
   const [startDate, setStartDate] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  // State for owner avatar loading
+  const [ownerAvatarFailed, setOwnerAvatarFailed] = useState(false)
 
   // Features based on category
   const getCategoryFeatures = (category: string) => {
@@ -81,14 +84,109 @@ export default function RentalDetail({ params }: RentalItemProps) {
         .single()
       
       if (error) {
+        console.error('Error fetching item details:', error);
         throw error
       }
       
       if (!data) {
+        console.error('No data returned for item ID:', id);
         throw new Error('פריט לא נמצא')
       }
+
+      console.log('Raw data from database:', JSON.stringify(data, null, 2));
       
-      console.log('Item images:', data.images);
+      // Process the data to ensure images are in the correct format
+      if (data.images) {
+        console.log('Raw images data:', data.images);
+        
+        // Handle various cases for how images might be stored
+        let processedImages: string[] = [];
+        
+        // Case 1: String representation of an array
+        if (typeof data.images === 'string' && (data.images.startsWith('[') || data.images.includes(','))) {
+          try {
+            processedImages = JSON.parse(data.images);
+            console.log('Parsed images from JSON string:', processedImages);
+          } catch (e) {
+            console.error('Failed to parse images JSON string:', e);
+            // If parse fails, split by comma
+            if (data.images.includes(',')) {
+              processedImages = data.images.split(',').map((url: string) => url.trim());
+              console.log('Split images by comma:', processedImages);
+            } else {
+              processedImages = [data.images];
+            }
+          }
+        } 
+        // Case 2: Already an array
+        else if (Array.isArray(data.images)) {
+          console.log('Images is already an array');
+          processedImages = data.images;
+        } 
+        // Case 3: Single string URL
+        else if (typeof data.images === 'string') {
+          console.log('Images is a single string');
+          processedImages = [data.images];
+        }
+        // Case 4: Unknown format
+        else {
+          console.log('Unknown images format, using empty array');
+          processedImages = [];
+        }
+        
+        // Clean and validate each URL
+        processedImages = processedImages
+          .filter((url: unknown) => url) // Remove empty values
+          .map((url: unknown) => {
+            // Remove quotes if present
+            if (typeof url === 'string') {
+              let cleanedUrl = url.replace(/^"|"$/g, '').trim();
+              
+              // Try to fix common URL encoding issues with spaces and special characters
+              try {
+                // If it's a Supabase URL with %20 or other encoding issues
+                if (cleanedUrl.includes('supabase.co') && 
+                    (cleanedUrl.includes('%20') || 
+                     cleanedUrl.includes('%') ||
+                     cleanedUrl.includes('('))) {
+                  
+                  console.log('Fixing encoded URL:', cleanedUrl);
+                  
+                  // Get the base URL and encoded path separately
+                  const urlParts = cleanedUrl.split('/public/');
+                  if (urlParts.length === 2) {
+                    const baseUrl = urlParts[0] + '/public/';
+                    const encodedPath = urlParts[1];
+                    
+                    // Try to properly encode problem characters
+                    const properlyEncodedPath = encodedPath
+                      .split('/')
+                      .map(segment => encodeURIComponent(decodeURIComponent(segment)))
+                      .join('/');
+                    
+                    cleanedUrl = baseUrl + properlyEncodedPath;
+                    console.log('Fixed URL:', cleanedUrl);
+                  }
+                }
+                
+                // Validate URL format
+                new URL(cleanedUrl);
+                return cleanedUrl;
+              } catch (e) {
+                console.error('Invalid URL:', cleanedUrl, e);
+                return null; // Will be filtered out
+              }
+            }
+            return null; // Non-string URLs will be filtered out
+          })
+          .filter((url): url is string => typeof url === 'string'); // Remove null values and type assertion
+        
+        data.images = processedImages;
+        console.log('Final processed images:', data.images);
+      } else {
+        data.images = [];
+      }
+      
       setItem(data)
     } catch (error: any) {
       console.error('Error fetching item details:', error.message)
@@ -150,6 +248,12 @@ export default function RentalDetail({ params }: RentalItemProps) {
     }
   }
 
+  // Handle owner avatar error
+  const handleOwnerAvatarError = () => {
+    console.error('Owner avatar failed to load:', item?.owner_profile?.avatar_url);
+    setOwnerAvatarFailed(true);
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-16rem)]">
@@ -200,21 +304,12 @@ export default function RentalDetail({ params }: RentalItemProps) {
         <div className="flex flex-col">
           <div className="relative w-full h-80 sm:h-96 overflow-hidden rounded-lg">
             {item.images && item.images.length > 0 ? (
-              <>
-                <img
-                  src={item.images[selectedImage]}
-                  alt={item.title}
-                  className="w-full h-full object-cover object-center"
-                  onError={(e) => {
-                    console.error('Image failed to load:', item.images[selectedImage]);
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = '/placeholder.svg';
-                  }}
-                />
-                <div className="absolute top-0 left-0 bg-black bg-opacity-50 text-white p-1 text-xs">
-                  URL: {item.images[selectedImage].substring(0, 30)}...
-                </div>
-              </>
+              <SafeImage
+                src={item.images[selectedImage]}
+                alt={item.title}
+                className="w-full h-full object-cover object-center"
+                fallbackText="תמונה לא זמינה"
+              />
             ) : (
               <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                 <span className="text-gray-400">אין תמונה</span>
@@ -230,15 +325,11 @@ export default function RentalDetail({ params }: RentalItemProps) {
                   className={`relative h-24 overflow-hidden rounded-lg ${selectedImage === index ? 'ring-2 ring-blue-500' : ''}`}
                   onClick={() => setSelectedImage(index)}
                 >
-                  <img
+                  <SafeImage
                     src={image}
                     alt={`${item.title} ${index + 1}`}
                     className="w-full h-full object-cover object-center"
-                    onError={(e) => {
-                      console.error('Thumbnail failed to load:', image);
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = '/placeholder.svg';
-                    }}
+                    fallbackText="לא זמין"
                   />
                 </button>
               ))}
@@ -311,11 +402,12 @@ export default function RentalDetail({ params }: RentalItemProps) {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
-                  {item.owner_profile?.avatar_url ? (
-                    <img
+                  {item.owner_profile?.avatar_url && !ownerAvatarFailed ? (
+                    <SafeImage
                       src={item.owner_profile.avatar_url}
                       alt={item.owner_profile.display_name || 'משתמש'}
                       className="h-10 w-10 rounded-full object-cover"
+                      onError={handleOwnerAvatarError}
                     />
                   ) : (
                     <User className="h-6 w-6" />
