@@ -192,12 +192,12 @@ export default function FeaturedItems() {
               <div 
                 key={item.id} 
                 className="w-full"
-              >
-                <div 
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => router.push(getProductLink(item.id))}
                 >
-                  <div className="relative h-48">
+                  <div 
+                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                    onClick={() => router.push(getProductLink(item.id))}
+                  >
+                    <div className="relative h-48">
                     {item.images && 
                      item.images.length > 0 && 
                      !imageErrors[item.id] ? (
@@ -216,26 +216,26 @@ export default function FeaturedItems() {
                     )}
                     <div className="absolute top-2 right-2 bg-white/80 text-sm font-medium text-gray-900 py-1 px-2 rounded">
                       {item.category || 'כללי'}
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-4">
+                    <div className="p-4">
                     <h3 className="font-bold text-lg text-gray-900 mb-1">{item.title}</h3>
-                    <div className="flex justify-between items-center">
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRentClick(item.id);
-                        }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                      >
-                        השכר עכשיו
-                      </button>
+                      <div className="flex justify-between items-center">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRentClick(item.id);
+                          }}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                        >
+                          השכר עכשיו
+                        </button>
                       <span className="font-bold text-gray-900">₪{item.price_per_day} / יום</span>
+                    </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       </div>

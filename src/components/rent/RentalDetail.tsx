@@ -6,26 +6,66 @@ import { useUserAuth } from '@/context/UserAuthContext'
 import { Star, MapPin, Calendar, Clock, User, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
-import SafeImage from '@/components/ui/SafeImage'
+import Image from 'next/image'
 
-interface RentalDetailProps {
+interface RentalDetailClientProps {
   id: string
-  initialData: any
 }
 
-export default function RentalDetail({ id, initialData }: RentalDetailProps) {
+interface Item {
+  id: string
+  title: string
+  description: string
+  price_per_day: number
+  images: string[]
+  owner_profile?: {
+    display_name: string
+    avatar_url: string
+  }
+}
+
+export default function RentalDetailClient({ id }: RentalDetailClientProps) {
   const { user, isAuthenticated, isLoading } = useUserAuth()
   const router = useRouter()
   const supabase = createClient()
   
-  const [item, setItem] = useState(initialData)
-  const [loading, setLoading] = useState(false)
+  const [item, setItem] = useState<Item | null>(null)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedImage, setSelectedImage] = useState(0)
   const [rentalDays, setRentalDays] = useState(1)
   const [startDate, setStartDate] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [ownerAvatarFailed, setOwnerAvatarFailed] = useState(false)
+
+  useEffect(() => {
+    fetchItemDetails()
+  }, [id])
+
+  const fetchItemDetails = async () => {
+    try {
+      setLoading(true)
+      
+      const { data, error } = await supabase
+        .from('items')
+        .select(`
+          *,
+          owner_profile:profiles!owner_id(display_name, avatar_url)
+        `)
+        .eq('id', id)
+        .single()
+      
+      if (error) throw error
+      if (!data) throw new Error('פריט לא נמצא')
+
+      setItem(data as Item)
+    } catch (error: any) {
+      console.error('Error fetching item:', error)
+      setError(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleRentNow = async () => {
     if (!isAuthenticated || !user) {
@@ -48,7 +88,7 @@ export default function RentalDetail({ id, initialData }: RentalDetailProps) {
           renter_id: user.id,
           start_date: startDate,
           days: rentalDays,
-          total_price: item.price_per_day * rentalDays,
+          total_price: item?.price_per_day ? item.price_per_day * rentalDays : 0,
           status: 'pending'
         })
 
@@ -96,7 +136,7 @@ export default function RentalDetail({ id, initialData }: RentalDetailProps) {
           {item.images && item.images.length > 0 && (
             <>
               <div className="aspect-w-16 aspect-h-9 relative rounded-lg overflow-hidden">
-                <SafeImage
+                <Image
                   src={item.images[selectedImage]}
                   alt={item.title}
                   fill
@@ -105,7 +145,7 @@ export default function RentalDetail({ id, initialData }: RentalDetailProps) {
               </div>
               {item.images.length > 1 && (
                 <div className="absolute inset-x-0 bottom-4 flex justify-center space-x-2 space-x-reverse">
-                  {item.images.map((_, index) => (
+                  {item.images.map((_: string, index: number) => (
                     <button
                       key={index}
                       className={`w-2 h-2 rounded-full ${
@@ -132,7 +172,7 @@ export default function RentalDetail({ id, initialData }: RentalDetailProps) {
             <h2 className="text-lg font-medium text-gray-900">פרטי המשכיר</h2>
             <div className="mt-2 flex items-center">
               {item.owner_profile?.avatar_url && !ownerAvatarFailed ? (
-                <SafeImage
+                <Image
                   src={item.owner_profile.avatar_url}
                   alt={item.owner_profile.display_name}
                   width={40}

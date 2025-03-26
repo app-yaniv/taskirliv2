@@ -62,7 +62,7 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoadingProfile, setIsLoadingProfile] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const isLoadingRealProfile = useRef(false)
-  
+
   // Set isClient to true when component mounts (client-side only)
   useEffect(() => {
     setIsClient(true)
@@ -105,7 +105,7 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
     if (!isClient) return;
 
     let mounted = true;
-    
+
     // Get initial session
     const initializeAuth = async () => {
       try {
