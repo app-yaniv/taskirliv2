@@ -8,16 +8,22 @@ import Benefits from '@/components/features/Benefits'
 import { useUserAuth } from '@/context/UserAuthContext'
 
 export default function Home() {
-  const { user, isAuthenticated } = useUserAuth()
+  const { user, profile, isAuthenticated } = useUserAuth()
   const [greeting, setGreeting] = useState('')
 
   useEffect(() => {
-    if (isAuthenticated && user?.email) {
-      // Get the first part of the email before the @ symbol
-      const name = user.email.split('@')[0]
+    if (isAuthenticated && user) {
+      // Use display_name if available, otherwise fallback to email username
+      let name = profile?.display_name || '';
+      
+      if (!name && user.email) {
+        // If no display name, get the first part of the email before the @ symbol
+        name = user.email.split('@')[0];
+      }
+      
       setGreeting(`שלום ${name}, ברוך הבא חזרה!`)
     }
-  }, [isAuthenticated, user])
+  }, [isAuthenticated, user, profile])
 
   return (
     <div className="min-h-screen">
