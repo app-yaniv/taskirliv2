@@ -3,5 +3,9 @@ export default function ProductLayout({
 }: {
   children: React.ReactNode
 }) {
-  return children
+  return (
+    <div className="min-h-screen bg-white">
+      {children}
+    </div>
+  )
 } 

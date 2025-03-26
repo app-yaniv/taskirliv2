@@ -6,11 +6,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { MapPin, Star } from 'lucide-react'
 
-// Generate static params for static export
-export async function generateStaticParams() {
-  return [{ id: 'sample-product' }]
-}
-
 // Sample product data - in a real app this would come from an API
 const sampleProduct = {
   id: 'sample-product',

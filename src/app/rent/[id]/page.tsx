@@ -88,6 +88,7 @@ export default function RentalDetail({ params }: RentalItemProps) {
         throw new Error('פריט לא נמצא')
       }
       
+      console.log('Item images:', data.images);
       setItem(data)
     } catch (error: any) {
       console.error('Error fetching item details:', error.message)
@@ -199,11 +200,21 @@ export default function RentalDetail({ params }: RentalItemProps) {
         <div className="flex flex-col">
           <div className="relative w-full h-80 sm:h-96 overflow-hidden rounded-lg">
             {item.images && item.images.length > 0 ? (
-              <img
-                src={item.images[selectedImage]}
-                alt={item.title}
-                className="w-full h-full object-cover object-center"
-              />
+              <>
+                <img
+                  src={item.images[selectedImage]}
+                  alt={item.title}
+                  className="w-full h-full object-cover object-center"
+                  onError={(e) => {
+                    console.error('Image failed to load:', item.images[selectedImage]);
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/placeholder.svg';
+                  }}
+                />
+                <div className="absolute top-0 left-0 bg-black bg-opacity-50 text-white p-1 text-xs">
+                  URL: {item.images[selectedImage].substring(0, 30)}...
+                </div>
+              </>
             ) : (
               <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                 <span className="text-gray-400">אין תמונה</span>
@@ -223,6 +234,11 @@ export default function RentalDetail({ params }: RentalItemProps) {
                     src={image}
                     alt={`${item.title} ${index + 1}`}
                     className="w-full h-full object-cover object-center"
+                    onError={(e) => {
+                      console.error('Thumbnail failed to load:', image);
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = '/placeholder.svg';
+                    }}
                   />
                 </button>
               ))}
