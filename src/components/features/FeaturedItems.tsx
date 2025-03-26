@@ -71,6 +71,14 @@ export default function FeaturedItems() {
     setCurrentIndex(prev => Math.min(maxIndex, prev + 1))
   }
 
+  const getProductLink = (itemId: string | number) => {
+    if (itemId === 'canon-eos-r6-kit') {
+      return '/product/sample-product'
+    } else {
+      return `/rent/${itemId}`
+    }
+  }
+
   const handleRentClick = (itemId: string | number) => {
     if (isAuthenticated) {
       // If authenticated, go to the product page for our sample product
@@ -109,7 +117,10 @@ export default function FeaturedItems() {
                   key={item.id} 
                   className="flex-none w-full sm:w-1/2 md:w-1/3 lg:w-1/3 p-4"
                 >
-                  <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                  <div 
+                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                    onClick={() => router.push(getProductLink(item.id))}
+                  >
                     <div className="relative h-48">
                       <Image
                         src={item.image}
@@ -132,7 +143,10 @@ export default function FeaturedItems() {
                       <div className="flex justify-between items-center">
                         <span className="font-bold text-gray-900">₪{item.price} / יום</span>
                         <button 
-                          onClick={() => handleRentClick(item.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRentClick(item.id);
+                          }}
                           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
                         >
                           השכר עכשיו

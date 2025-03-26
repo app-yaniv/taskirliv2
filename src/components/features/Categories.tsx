@@ -27,7 +27,8 @@ const categories = [
   { 
     name: 'מצלמות',
     image: 'https://images.pexels.com/photos/243757/pexels-photo-243757.jpeg',
-    count: '1,234'
+    count: '1,234',
+    specialLink: '/product/sample-product'
   },
   { 
     name: 'ציוד ספורט',
@@ -53,7 +54,7 @@ export default function Categories() {
           {categories.map((category) => (
             <Link
               key={category.name}
-              href={`/category/${category.name.toLowerCase().replace(' ', '-')}`}
+              href={category.specialLink || `/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
               className="group relative bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
             >
               <div className="relative h-48">
@@ -63,6 +64,7 @@ export default function Categories() {
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-200"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  unoptimized
                 />
               </div>
               <div className="p-4">
