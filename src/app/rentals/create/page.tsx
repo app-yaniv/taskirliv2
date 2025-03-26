@@ -43,21 +43,21 @@ export default function CreateRentalListing() {
         .storage
         .getBucket('images')
       
-      // If bucket doesn't exist, create it
-      if (bucketError || !bucketExists) {
-        console.log('Creating images bucket...')
-        const { error } = await supabase
-          .storage
-          .createBucket('images', {
-            public: true,
-            fileSizeLimit: 10485760, // 10MB
-            allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp']
-          })
-          
-        if (error) {
-          throw error
-        }
-        console.log('Bucket created successfully')
+      if (bucketError) {
+        // Log the error but don't throw it - the bucket might exist but we don't have permission to check
+        console.log('Note: Unable to check bucket existence. This is normal if RLS is enabled.')
+      }
+      
+      // Don't try to create the bucket - assume it exists or will be created by admin
+      // Just verify we can access it by listing files
+      const { data: files, error: listError } = await supabase
+        .storage
+        .from('images')
+        .list()
+      
+      if (listError) {
+        console.error('Error accessing storage:', listError.message)
+        setBucketError('Unable to access storage. Please contact support if this persists.')
       }
     } catch (error: any) {
       console.error('Error initializing storage:', error.message)

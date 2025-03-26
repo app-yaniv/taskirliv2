@@ -11,6 +11,7 @@ type UserAuthContextType = {
   isLoading: boolean
   signOut: () => Promise<void>
   isAuthenticated: boolean
+  updateUserMetadata: (metadata: Record<string, any>) => Promise<{ success: boolean, error?: string }>
 }
 
 const UserAuthContext = createContext<UserAuthContextType>({
@@ -19,6 +20,7 @@ const UserAuthContext = createContext<UserAuthContextType>({
   isLoading: true,
   signOut: async () => {},
   isAuthenticated: false,
+  updateUserMetadata: async () => ({ success: false }),
 })
 
 export const UserAuthProvider: React.FC<{
@@ -48,7 +50,7 @@ export const UserAuthProvider: React.FC<{
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: string, session: Session | null) => {
         setSession(session)
         setUser(session?.user ?? null)
         setIsLoading(false)
@@ -59,6 +61,34 @@ export const UserAuthProvider: React.FC<{
       subscription.unsubscribe()
     }
   }, [])
+
+  const updateUserMetadata = async (metadata: Record<string, any>) => {
+    try {
+      console.log('Updating user metadata with:', metadata)
+      
+      const { data, error } = await supabase.auth.updateUser({
+        data: metadata
+      })
+
+      console.log('Supabase updateUser response:', { data, error })
+
+      if (error) {
+        console.error('Error updating user metadata:', error.message)
+        return { success: false, error: error.message }
+      }
+
+      // Update local user state with new metadata
+      if (data.user) {
+        console.log('Updated user object:', data.user)
+        setUser(data.user)
+      }
+
+      return { success: true }
+    } catch (error: any) {
+      console.error('Error in updateUserMetadata:', error.message)
+      return { success: false, error: error.message }
+    }
+  }
 
   const signOut = async () => {
     try {
@@ -92,6 +122,7 @@ export const UserAuthProvider: React.FC<{
     isLoading,
     signOut,
     isAuthenticated: !!user,
+    updateUserMetadata,
   }
 
   return (
