@@ -14,9 +14,9 @@ export default function FeaturedItems() {
 
   const featuredItems = [
     {
-      id: 1,
-      name: 'מצלמת Sony A7III',
-      price: 120,
+      id: 'canon-eos-r6-kit',
+      name: 'CANON EOS R6 MARK II BODY + 28-70MM F/2.8 LENS + FLASH',
+      price: 45,
       image: 'https://images.pexels.com/photos/51383/photo-camera-subject-photographer-51383.jpeg',
       reviews: 28,
       rating: 4.9,
@@ -71,13 +71,22 @@ export default function FeaturedItems() {
     setCurrentIndex(prev => Math.min(maxIndex, prev + 1))
   }
 
-  const handleRentClick = (itemId: number) => {
+  const handleRentClick = (itemId: string | number) => {
     if (isAuthenticated) {
-      // If authenticated, go directly to the rental page
-      router.push(`/rent/${itemId}`)
+      // If authenticated, go to the product page for our sample product
+      if (itemId === 'canon-eos-r6-kit') {
+        router.push(`/product/sample-product`)
+      } else {
+        // Go to the original rent page for other items
+        router.push(`/rent/${itemId}`)
+      }
     } else {
       // If not authenticated, redirect to signin with a redirect back to the item
-      router.push(`/auth/signin?redirectedFrom=/rent/${itemId}`)
+      if (itemId === 'canon-eos-r6-kit') {
+        router.push(`/auth/signin?redirectedFrom=/product/sample-product`)
+      } else {
+        router.push(`/auth/signin?redirectedFrom=/rent/${itemId}`)
+      }
     }
   }
 
