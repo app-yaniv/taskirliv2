@@ -1,14 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Remove static export configuration
-  // output: 'export',
+  output: 'export',
   
   // Configure base path only if not in production
-  basePath: process.env.NODE_ENV === 'production' ? '' : '',
+  basePath: process.env.NODE_ENV === 'production' ? '' : '/taskirliv2',
   
   images: {
     // Enable image optimization for server deployment
-    unoptimized: false,
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -21,7 +20,7 @@ const nextConfig = {
   // trailingSlash: true,
   
   // Set asset prefix only for GitHub Pages if needed
-  assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '' : '/taskirliv2/',
   
   // Temporarily disable TypeScript checking during build
   typescript: {

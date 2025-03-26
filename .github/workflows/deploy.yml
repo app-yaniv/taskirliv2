@@ -4,15 +4,11 @@ on:
   push:
     branches:
       - master
-      - fix-deployment
-  workflow_dispatch:  # Allow manual triggering
-
-permissions:
-  contents: write
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -23,8 +19,8 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install Dependencies
+        run: npm install
 
       - name: Build
         run: npm run build
@@ -33,12 +29,11 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Create .nojekyll file
-        run: touch out/.nojekyll
+        run: touch ./out/.nojekyll
 
-      - name: Deploy
+      - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: out
           branch: gh-pages
-          clean: true  # Clean any existing files in gh-pages branch
-          single-commit: true  # Just use a single commit for the branch 
+          folder: out
+          clean: true 
