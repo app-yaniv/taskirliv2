@@ -3,7 +3,11 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - fix-profile-loading-issue  # Using the specified branch
+      - fix-profile-loading-issue
+  workflow_dispatch:  # Allow manual triggering
+
+permissions:
+  contents: write
 
 jobs:
   build-and-deploy:
