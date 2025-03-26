@@ -24,7 +24,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build
         run: npm run build
@@ -32,8 +32,13 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
+      - name: Create .nojekyll file
+        run: touch out/.nojekyll
+
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: out
-          branch: gh-pages 
+          branch: gh-pages
+          clean: true  # Clean any existing files in gh-pages branch
+          single-commit: true  # Just use a single commit for the branch 
