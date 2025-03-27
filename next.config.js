@@ -3,7 +3,7 @@ const nextConfig = {
   output: 'export',
   basePath: '/taskirliv2',
   assetPrefix: '/taskirliv2/',
-  distDir: 'docs',
+  distDir: 'out',
   trailingSlash: true,
   images: {
     remotePatterns: [
