@@ -31,88 +31,57 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build Next.js site
         run: npm run build
 
-      - name: Create static homepage with links
+      - name: Create .nojekyll file
+        run: touch out/.nojekyll
+
+      - name: Fix homepage redirect
         run: |
-          cat > out/index.html << 'EOF'
+          if [ -d "out/_next" ]; then
+            echo "Creating proper Next.js homepage..."
+            cat > out/index.html << 'EOF'
           <!DOCTYPE html>
           <html>
           <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>TaskirLiv2 - Homepage</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-              .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-              header { background: linear-gradient(to bottom, #f0f9ff, #ffffff); padding: 40px 0; text-align: center; }
-              h1 { color: #1e40af; margin-bottom: 16px; font-size: 2.5rem; }
-              p { color: #4b5563; margin-bottom: 24px; font-size: 1.125rem; }
-              .btn { display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; 
-                    text-decoration: none; border-radius: 8px; font-weight: bold; transition: background-color 0.3s; }
-              .btn:hover { background-color: #1d4ed8; }
-              .products { padding: 48px 0; }
-              .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
-                            gap: 24px; margin-top: 32px; }
-              .product-card { border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; transition: transform 0.3s; }
-              .product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-              .product-card a { text-decoration: none; color: inherit; display: block; padding: 16px; }
-              h3 { color: #1f2937; margin-bottom: 8px; }
-              .product-description { color: #6b7280; font-size: 0.875rem; }
-              footer { background-color: #1f2937; color: white; padding: 48px 0; text-align: center; }
-            </style>
+            <title>TaskirLiv2</title>
+            <script>
+              // Redirect to the actual app path with basePath
+              window.location.href = '/taskirliv2/';
+            </script>
           </head>
           <body>
-            <header>
-              <div class="container">
-                <h1>Welcome to TaskirLiv2</h1>
-                <p>The leading rental platform in Israel</p>
-                <a href="/taskirliv2/product/7ef9ba3b-84fb-40b4-8447-91a97deee6b3/" class="btn">View Our Products</a>
+            <div id="__next">
+              <div style="text-align: center; padding-top: 100px;">
+                <h1 style="font-size: 24px; font-weight: bold;">Loading TaskirLiv2...</h1>
+                <p style="margin-top: 16px;">If you are not redirected automatically, <a href="/taskirliv2/" style="color: blue; text-decoration: underline;">click here</a>.</p>
               </div>
-            </header>
-            
-            <section class="products">
-              <div class="container">
-                <h2 style="text-align: center; margin-bottom: 16px; font-size: 2rem; color: #1f2937;">Popular Products</h2>
-                <p style="text-align: center; margin-bottom: 32px; color: #6b7280;">Choose from our quality product selection</p>
-                
-                <div class="product-grid">
-                  <div class="product-card">
-                    <a href="/taskirliv2/product/7ef9ba3b-84fb-40b4-8447-91a97deee6b3/">
-                      <h3>Popular Product</h3>
-                      <p class="product-description">Short description of the popular product</p>
-                    </a>
-                  </div>
-                  
-                  <div class="product-card">
-                    <a href="/taskirliv2/product/252c5d46-580b-4416-ac55-4be55f1f563d/">
-                      <h3>Another Popular Product</h3>
-                      <p class="product-description">Short description of another popular product</p>
-                    </a>
-                  </div>
-                  
-                  <div class="product-card">
-                    <a href="/taskirliv2/product/7ef9ba3b-84fb-40b4-8447-91a97deee6b3/">
-                      <h3>Additional Product</h3>
-                      <p class="product-description">Short description of an additional product</p>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </section>
-            
-            <footer>
-              <div class="container">
-                <p>&copy; 2025 TaskirLiv2. All rights reserved.</p>
-              </div>
-            </footer>
+            </div>
           </body>
           </html>
           EOF
-
-      - name: Create .nojekyll file
-        run: touch out/.nojekyll
+            echo "Created index.html with proper Next.js loading and redirect."
+          else
+            echo "Warning: _next directory not found. Creating simple redirect..."
+            cat > out/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>TaskirLiv2</title>
+            <meta http-equiv="refresh" content="0; URL=/taskirliv2/">
+          </head>
+          <body>
+            <p>Redirecting to <a href="/taskirliv2/">TaskirLiv2</a>...</p>
+          </body>
+          </html>
+          EOF
+            echo "Created simple redirect index.html."
+          fi
 
       - name: Debug build output
         run: ls -la out/
