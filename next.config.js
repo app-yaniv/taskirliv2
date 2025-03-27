@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  basePath: '/taskirliv2',
-  assetPrefix: '/taskirliv2/',
-  trailingSlash: true,
+  basePath: '',
+  distDir: 'docs',
   images: {
     remotePatterns: [
       {

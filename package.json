@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && touch out/.nojekyll",
-    "clean-build": "rimraf .next && next build && touch out/.nojekyll",
+    "build": "next build && touch docs/.nojekyll",
+    "clean-build": "rimraf docs && next build && touch docs/.nojekyll",
+    "build-docs": "node build-docs.js",
     "start": "next start",
     "lint": "next lint"
   },

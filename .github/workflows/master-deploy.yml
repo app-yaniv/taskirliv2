@@ -1,9 +1,9 @@
-name: Deploy to GitHub Pages (Old - Not Used)
+name: Build and Deploy from Master
 
 on:
   push:
     branches:
-      - unused-branch-name
+      - master
   workflow_dispatch:  # Allow manual triggering
 
 permissions:
@@ -20,7 +20,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
 
       - name: Install dependencies
         run: npm install
@@ -31,13 +30,11 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
-      - name: Create .nojekyll file
-        run: touch out/.nojekyll
-
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          folder: out
-          branch: gh-pages
-          clean: true  # Clean any existing files in gh-pages branch
-          single-commit: true  # Just use a single commit for the branch 
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          publish_branch: master
+          keep_files: true
+          destination_dir: docs 
