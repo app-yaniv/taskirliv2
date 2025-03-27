@@ -306,7 +306,7 @@ export default function RentalDetailClient({ item, isRefreshing = false }: Renta
               </div>
 
               <div className="mt-6 flex items-center justify-between">
-                <p className="text-lg font-medium text-gray-900">סה"כ:</p>
+                <p className="text-lg font-medium text-gray-900">סה&quot;כ:</p>
                 <p className="text-xl font-bold text-gray-900">₪{totalPrice}</p>
               </div>
 

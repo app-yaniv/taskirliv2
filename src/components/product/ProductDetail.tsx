@@ -382,7 +382,7 @@ export default function ProductDetail({ itemId }: ProductDetailProps) {
                 <p>₪{totalPrice}</p>
               </div>
               <div className="flex justify-between font-semibold text-lg">
-                <p>סה"כ</p>
+                <p>סה&quot;כ</p>
                 <p>₪{totalPrice}</p>
               </div>
             </div>

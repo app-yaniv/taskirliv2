@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useRef } from 'react'
+import { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { User, Profile } from '@/types/supabase'
 
@@ -24,6 +24,23 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
   const [isClient, setIsClient] = useState(false)
   const isLoadingRealProfile = useRef(false)
   const supabase = createClient()
+
+  const fetchProfile = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+      if (error) throw error
+      setProfile(data)
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+    } finally {
+      isLoadingRealProfile.current = false
+    }
+  }, [supabase]);
 
   useEffect(() => {
     setIsClient(true)
@@ -50,24 +67,7 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
       isLoadingRealProfile.current = true
       fetchProfile(user.id)
     }
-  }, [user])
-
-  const fetchProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-
-      if (error) throw error
-      setProfile(data)
-    } catch (error) {
-      console.error('Error fetching profile:', error)
-    } finally {
-      isLoadingRealProfile.current = false
-    }
-  }
+  }, [user, fetchProfile])
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({

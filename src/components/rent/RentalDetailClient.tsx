@@ -225,7 +225,7 @@ export default function RentalDetailClient({ id }: RentalDetailClientProps) {
                 />
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-700">סה"כ:</span>
+                <span className="text-gray-700">סה&quot;כ:</span>
                 <span className="text-xl font-bold text-blue-600">₪{item.price_per_day * rentalDays}</span>
               </div>
               <button
