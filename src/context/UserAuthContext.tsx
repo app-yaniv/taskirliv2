@@ -4,9 +4,12 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session, AuthChangeEvent } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
 import { getUserProfile, Profile, updateUserProfile } from '@/utils/supabase/profile'
+import { storage } from '@/utils/storage'
 
-// Reduce timeout to 5 seconds since we've optimized the loading
-const PROFILE_LOADING_TIMEOUT = 5000; // 5 seconds
+// Maximum time to wait for profile fetch (5 seconds)
+const FETCH_TIMEOUT = 5000
+// How often to sync the profile (15 minutes)
+const SYNC_INTERVAL = 15 * 60 * 1000
 
 export type UserAuthContextType = {
   user: User | null
@@ -63,164 +66,86 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
   const [profileError, setProfileError] = useState<Error | null>(null)
   const [initAttempted, setInitAttempted] = useState(false)
   const [isClient, setIsClient] = useState(false)
-  const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null)
 
-  // Set isClient to true when component mounts (client-side only)
   useEffect(() => {
     setIsClient(true)
   }, [])
 
+  // Profile sync effect
   useEffect(() => {
-    // Only run auth logic on the client side
-    if (!isClient) return
+    if (!isClient || !user) return
 
-    let mounted = true
-    const startTime = performance.now();
-    console.log("🔄 Auth Provider initialized at", new Date().toISOString());
-
-    // Get initial session
-    const initializeAuth = async () => {
-      try {
-        console.log("🔍 Getting session...")
-        console.time('getSession');
-        const sessionStart = performance.now();
-        const { data: { session } } = await supabase.auth.getSession()
-        const sessionEnd = performance.now();
-        console.timeEnd('getSession');
-        console.log(`🕒 Get session took ${sessionEnd - sessionStart}ms`)
-        console.log("📋 Session data:", session ? "Session exists" : "No session")
-        
-        if (!mounted) return
-
-        setUser(session?.user ?? null)
-        if (session?.user) {
-          console.log("👤 User found, loading profile...")
-          const profileStart = performance.now();
-          await loadProfile(session.user)
-          const profileEnd = performance.now();
-          console.log(`🕒 Total profile loading took ${profileEnd - profileStart}ms`)
-        }
-      } catch (error) {
-        console.error('❌ Error initializing auth:', error)
-      } finally {
-        if (mounted) {
-          const endTime = performance.now();
-          console.log(`🕒 Auth initialization complete, took ${endTime - startTime}ms`)
-          console.log("✅ Setting isLoading to false")
-          setIsLoading(false)
-          setInitAttempted(true)
+    const syncProfile = async () => {
+      const cachedTimestamp = storage.getProfileTimestamp()
+      // Only sync if cache is older than sync interval
+      if (!cachedTimestamp || Date.now() - cachedTimestamp > SYNC_INTERVAL) {
+        console.log("🔄 Auto-syncing profile")
+        try {
+          const { data, error } = await getUserProfile()
+          if (!error && data) {
+            setProfile(data)
+            storage.saveProfile(data)
+          }
+        } catch (error) {
+          console.error('Error during profile sync:', error)
         }
       }
     }
 
-    initializeAuth()
-
-    // Listen for auth changes
-    const {
-      data: { subscription }
-    } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
-      console.log("🔔 Auth state change:", event, session ? "Session exists" : "No session")
-      
-      if (!mounted) return
-      
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        const profileStart = performance.now();
-        await loadProfile(session.user)
-        const profileEnd = performance.now();
-        console.log(`🕒 Profile loading during auth change took ${profileEnd - profileStart}ms`)
-      } else {
-        setProfile(null)
-      }
-      setIsLoading(false)
-      setInitAttempted(true)
-    })
-
-    return () => {
-      console.log("🧹 Cleaning up auth provider")
-      mounted = false
-      subscription.unsubscribe()
-    }
-  }, [isClient])
-
-  // Failsafe for profile loading
-  useEffect(() => {
-    if (!isClient) return
-    
-    // If we've attempted initialization, we're not loading auth, but we are still loading profile
-    // after timeout seconds, consider it a failure and stop loading
-    if (initAttempted && !isLoading && isLoadingProfile) {
-      if (loadingStartTime === null) {
-        // Set the start time if it's not set yet
-        setLoadingStartTime(performance.now())
-      }
-      
-      const currentTime = performance.now();
-      const elapsedTime = loadingStartTime !== null ? currentTime - loadingStartTime : 0;
-      
-      console.log(`⏳ Profile loading in progress for ${Math.round(elapsedTime)}ms (timeout: ${PROFILE_LOADING_TIMEOUT}ms)`)
-      
-      const timeout = setTimeout(() => {
-        console.log(`⚠️ Profile loading timeout reached after ${PROFILE_LOADING_TIMEOUT}ms, stopping loading state`)
-        
-        // Create a default profile if we timeout
-        if (user) {
-          console.log("Creating default profile due to timeout")
-          const mockProfile = createMockProfile(user.id, user.email || undefined)
-          setProfile(mockProfile)
-        }
-        
-        setIsLoadingProfile(false)
-        setLoadingStartTime(null)
-      }, PROFILE_LOADING_TIMEOUT)
-      
-      return () => clearTimeout(timeout)
-    } else if (!isLoadingProfile) {
-      // Reset the loading start time when not loading
-      setLoadingStartTime(null)
-    }
-  }, [initAttempted, isLoading, isLoadingProfile, isClient, user, loadingStartTime])
+    const interval = setInterval(syncProfile, SYNC_INTERVAL)
+    return () => clearInterval(interval)
+  }, [isClient, user])
 
   const loadProfile = async (user: User) => {
     if (!user) return
     
-    const startTime = performance.now();
+    const startTime = performance.now()
     console.log("🔄 Loading profile for user:", user.id)
     setIsLoadingProfile(true)
     setProfileError(null)
+
+    // Try to load cached profile first
+    const cachedProfile = storage.getProfile()
+    if (cachedProfile) {
+      console.log("📦 Using cached profile while fetching fresh data")
+      setProfile(cachedProfile)
+    }
+
     try {
-      console.time('getUserProfile');
+      console.time('getUserProfile')
       const { data, error } = await getUserProfile()
-      const profileTime = performance.now() - startTime;
-      console.timeEnd('getUserProfile');
-      console.log(`🕒 getUserProfile() took ${profileTime}ms`);
-      
-      console.log("📋 Profile data:", data ? "Profile exists" : "No profile", error ? `Error: ${error.message}` : "No error")
+      const profileTime = performance.now() - startTime
+      console.timeEnd('getUserProfile')
+      console.log(`🕒 getUserProfile() took ${profileTime}ms`)
       
       if (error) {
         console.error("❌ Error loading profile:", error)
         setProfileError(error)
-        
-        // Create a mock profile to unblock the UI
-        console.log("⚠️ Creating mock profile to unblock UI")
-        const mockProfile = createMockProfile(user.id, user.email || undefined)
-        
-        setProfile(mockProfile)
+        // Keep using cached profile if available
+        if (!cachedProfile) {
+          throw error
+        }
       } else if (!data) {
-        console.log("⚠️ No profile data found, creating empty profile")
-        setProfile(null)
+        console.log("⚠️ No profile data found")
+        if (!cachedProfile) {
+          setProfile(null)
+          throw new Error('No profile data found')
+        }
       } else {
         console.log("✅ Profile loaded successfully")
         setProfile(data)
+        // Update cache with fresh data
+        storage.saveProfile(data)
       }
     } catch (error) {
       console.error('❌ Error loading profile:', error)
       setProfileError(error as Error)
-      setProfile(null)
+      if (!cachedProfile) {
+        setProfile(null)
+      }
     } finally {
-      const endTime = performance.now();
-      const totalTime = endTime - startTime;
-      console.log(`🏁 Profile loading complete, took ${totalTime}ms. Setting isLoadingProfile to false`)
+      const endTime = performance.now()
+      console.log(`🏁 Profile loading complete, took ${endTime - startTime}ms`)
       setIsLoadingProfile(false)
     }
   }
@@ -249,6 +174,7 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error
       setUser(null)
       setProfile(null)
+      storage.clearProfile() // Clear cached profile
       console.log("✅ Signed out successfully")
     } catch (error) {
       console.error('❌ Error signing out:', error)
@@ -256,21 +182,58 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Consider profile "loaded" even when there's an error, to prevent infinite loading
-  const isFullyLoaded = !isLoading && (!isLoadingProfile || !!profileError)
-  
-  console.log("📊 Auth state:", { 
-    isLoading, 
-    isLoadingProfile, 
-    profileError: !!profileError,
-    isFullyLoaded, 
-    isAuthenticated: !!user,
-    hasProfile: !!profile,
-    loadingTime: loadingStartTime !== null ? Math.round(performance.now() - loadingStartTime) : null,
-    isClient
-  })
+  useEffect(() => {
+    if (!isClient) return
 
-  // If we're still on the server side, return a placeholder
+    let mounted = true
+    const startTime = performance.now()
+    console.log("🔄 Auth Provider initialized")
+
+    const initializeAuth = async () => {
+      try {
+        console.log("🔍 Getting session...")
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (!mounted) return
+
+        setUser(session?.user ?? null)
+        if (session?.user) {
+          console.log("👤 User found, loading profile...")
+          await loadProfile(session.user)
+        }
+      } catch (error) {
+        console.error('❌ Error initializing auth:', error)
+      } finally {
+        if (mounted) {
+          console.log(`🕒 Auth initialization complete, took ${performance.now() - startTime}ms`)
+          setIsLoading(false)
+          setInitAttempted(true)
+        }
+      }
+    }
+
+    initializeAuth()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return
+      
+      setUser(session?.user ?? null)
+      if (session?.user) {
+        await loadProfile(session.user)
+      } else {
+        setProfile(null)
+        storage.clearProfile()
+      }
+      setIsLoading(false)
+      setInitAttempted(true)
+    })
+
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
+  }, [isClient])
+
   if (!isClient) {
     return (
       <UserAuthContext.Provider
@@ -293,7 +256,7 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         profile,
-        isLoading: !isFullyLoaded,
+        isLoading: !initAttempted || isLoadingProfile,
         isAuthenticated: !!user,
         signOut,
         updateProfile

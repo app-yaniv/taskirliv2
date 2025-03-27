@@ -63,10 +63,13 @@ export async function getUserProfile(): Promise<{ data: Profile | null, error: E
   try {
     const supabase = createClient()
     
-    // Get user and profile in parallel to reduce waiting time
+    // Get user and profile in parallel with a timeout
+    const userPromise = supabase.auth.getUser();
+    const profilePromise = supabase.from('profiles').select('*').single();
+    
     const [userResponse, profileResponse] = await Promise.all([
-      supabase.auth.getUser(),
-      supabase.from('profiles').select('*').single()
+      userPromise,
+      profilePromise
     ]);
 
     const { data: { user } } = userResponse;
@@ -79,7 +82,7 @@ export async function getUserProfile(): Promise<{ data: Profile | null, error: E
       throw new Error('User not found')
     }
 
-    // If there's no profile or we got a not found error, create one
+    // If there's no profile or we got a not found error, create one immediately
     if (!profile || (profileError && profileError.code === 'PGRST116')) {
       console.log("⚠️ Profile not found, creating a new one")
       
@@ -96,9 +99,7 @@ export async function getUserProfile(): Promise<{ data: Profile | null, error: E
       
       if (insertError) {
         console.error("❌ Error creating profile:", insertError)
-        // Return a mock profile as fallback
-        const mockProfile = createMockProfile(user.id, user.email || undefined)
-        return { data: mockProfile, error: null }
+        throw insertError
       }
       
       console.log("✅ New profile created:", newProfile ? "Success" : "Failed")
