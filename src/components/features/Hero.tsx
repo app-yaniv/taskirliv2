@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { useUserAuth } from '@/context/UserAuthContext'
 import { useRouter } from 'next/navigation'
 
@@ -9,12 +8,8 @@ export default function Hero() {
   const router = useRouter()
 
   const handleRentingClick = () => {
-    // When someone clicks "Start Renting", we'll show them featured items
-    // No authentication required, so just scroll to featured items
-    const featuredItemsSection = document.querySelector('#featured-items')
-    if (featuredItemsSection) {
-      featuredItemsSection.scrollIntoView({ behavior: 'smooth' })
-    }
+    // When someone clicks "Start Renting", take them to our sample product page
+    router.push('/product/sample-product')
   }
 
   const handleListItemClick = () => {

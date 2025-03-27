@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 
-export default function ResetPassword() {
+function ResetPasswordContent() {
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -97,6 +97,24 @@ export default function ResetPassword() {
             חזרה להתחברות
           </Link>
         </div>
+      </div>
+    </div>
+  )
+}
+
+export default function ResetPassword() {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
+        <Suspense fallback={
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              טוען...
+            </h2>
+          </div>
+        }>
+          <ResetPasswordContent />
+        </Suspense>
       </div>
     </div>
   )

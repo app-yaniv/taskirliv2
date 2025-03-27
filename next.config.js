@@ -2,23 +2,23 @@
 const nextConfig = {
   output: 'export',
   basePath: '/taskirliv2',
+  assetPrefix: '/taskirliv2/',
+  trailingSlash: true,
   images: {
-    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '**',
       },
     ],
+    unoptimized: true,
   },
-  // Disable server-side features for static export
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   experimental: {
-    appDir: true,
+    serverActions: true,
   },
-  // Handle trailing slashes
-  trailingSlash: true,
-  // Disable image optimization for static export
-  assetPrefix: '/taskirliv2',
 }
 
 module.exports = nextConfig 

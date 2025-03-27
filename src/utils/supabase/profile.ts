@@ -58,120 +58,51 @@ const createMockProfile = (userId: string, email?: string): Profile => ({
  * Get user profile data
  */
 export async function getUserProfile(): Promise<{ data: Profile | null, error: Error | null }> {
-  const startTime = performance.now();
-  console.log("🔄 getUserProfile called at", new Date().toISOString());
   try {
-    console.time('createClient');
     const supabase = createClient()
-    console.timeEnd('createClient');
     
-    console.time('getUser');
-    const { data: { user } } = await supabase.auth.getUser()
-    const getUserTime = performance.now();
-    console.timeEnd('getUser');
-    console.log(`🕒 Auth.getUser took ${getUserTime - startTime}ms`);
+    // Get both user and profile in parallel
+    const [userResponse, profileResponse] = await Promise.all([
+      supabase.auth.getUser(),
+      supabase.from('profiles')
+        .select('*')
+        .limit(1)
+        .maybeSingle()
+    ]);
     
-    console.log("🔍 Current user:", user ? `ID: ${user.id}` : "No user found")
+    const user = userResponse.data.user;
     
     if (!user) {
-      console.log("❌ No user found, cannot get profile")
-      throw new Error('User not found')
+      return { data: null, error: new Error('User not found') }
     }
     
-    console.log("🔍 Fetching profile for user:", user.id)
-    console.time('fetchProfile');
-    const fetchStart = performance.now();
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
-    const fetchEnd = performance.now();
-    console.timeEnd('fetchProfile');
-    console.log(`🕒 Profile fetch took ${fetchEnd - fetchStart}ms`);
+    // If profile exists, return it
+    if (profileResponse.data) {
+      return { data: profileResponse.data, error: null }
+    }
     
-    console.log("📊 Profile query result:", data ? "Profile found" : "No profile found", error ? `Error: ${error.message}` : "No error")
-    
-    if (error) {
-      // Check if it's a "not found" error
-      if (error.code === 'PGRST116') {
-        console.log("⚠️ Profile not found, creating a new one")
-        
-        // First check if the profiles table exists
-        console.time('checkTable');
-        const tableCheckStart = performance.now();
-        const { error: tableError } = await supabase
+    // If no profile exists, create one
+    if (profileResponse.error?.code === 'PGRST116' || !profileResponse.data) {
+      try {
+        const { data: newProfile, error: insertError } = await supabase
           .from('profiles')
-          .select('id')
-          .limit(1)
-        const tableCheckEnd = performance.now();
-        console.timeEnd('checkTable');
-        console.log(`🕒 Table check took ${tableCheckEnd - tableCheckStart}ms`);
+          .insert({ id: user.id })
+          .select()
+          .single()
         
-        if (tableError) {
-          console.error("❌ Error checking profiles table:", tableError)
-          // If the table doesn't exist, we need to create a minimal profile object
-          console.log("⚠️ Creating a mock profile since the table might not exist")
+        if (insertError) {
           const mockProfile = createMockProfile(user.id, user.email || undefined)
-          
-          console.log("✅ Using mock profile:", mockProfile)
-          const endTime = performance.now();
-          console.log(`🕒 Total getUserProfile time (mock profile): ${endTime - startTime}ms`);
           return { data: mockProfile, error: null }
         }
         
-        // Try to create the profile
-        try {
-          console.log("🔍 Inserting new profile for user:", user.id)
-          console.time('insertProfile');
-          const insertStart = performance.now();
-          const { data: newProfile, error: insertError } = await supabase
-            .from('profiles')
-            .insert({ id: user.id })
-            .select()
-            .single()
-          const insertEnd = performance.now();
-          console.timeEnd('insertProfile');
-          console.log(`🕒 Profile insert took ${insertEnd - insertStart}ms`);
-          
-          if (insertError) {
-            console.error("❌ Error creating profile:", insertError)
-            
-            // If insert fails, try to create a minimal profile object
-            if (insertError.code) {
-              console.log("⚠️ Creating a mock profile since insert failed")
-              const mockProfile = createMockProfile(user.id, user.email || undefined)
-              
-              console.log("✅ Using mock profile after insert error:", mockProfile)
-              const endTime = performance.now();
-              console.log(`🕒 Total getUserProfile time (mock after error): ${endTime - startTime}ms`);
-              return { data: mockProfile, error: null }
-            }
-            
-            throw insertError
-          }
-          
-          console.log("✅ New profile created:", newProfile ? "Success" : "Failed")
-          const endTime = performance.now();
-          console.log(`🕒 Total getUserProfile time (new profile): ${endTime - startTime}ms`);
-          return { data: newProfile, error: null }
-        } catch (insertError) {
-          console.error("❌ Exception while creating profile:", insertError)
-          throw insertError
-        }
+        return { data: newProfile, error: null }
+      } catch (insertError) {
+        return { data: null, error: insertError as Error }
       }
-      
-      throw error
     }
     
-    console.log("✅ Profile retrieved successfully")
-    const endTime = performance.now();
-    console.log(`🕒 Total getUserProfile time (existing profile): ${endTime - startTime}ms`);
-    return { data, error: null }
+    return { data: null, error: profileResponse.error }
   } catch (error) {
-    console.error('❌ Error getting user profile:', error)
-    const endTime = performance.now();
-    console.log(`🕒 Total getUserProfile time (error): ${endTime - startTime}ms`);
     return { data: null, error: error as Error }
   }
 }

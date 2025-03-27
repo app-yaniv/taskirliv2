@@ -62,6 +62,14 @@ const SettingsItem = ({
   );
 };
 
+// Replace any with proper type
+interface ProfileData {
+  id: string
+  display_name: string
+  avatar_url: string | null
+  // Add other relevant fields
+}
+
 function ProfileContent() {
   console.log("🔄 Profile page component rendering");
   const { user, profile, isLoading, isAuthenticated, signOut, updateProfile } = useUserAuth()

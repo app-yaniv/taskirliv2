@@ -78,7 +78,7 @@ export default function CreateRentalListing() {
         category: formData.category,
         price_per_day: parseFloat(formData.price_per_day),
         location: formData.location,
-        images: uploadedImages,
+        images: uploadedImages, // Store the array of image URLs directly
         status: 'active',
       }
       
@@ -157,7 +157,8 @@ export default function CreateRentalListing() {
           .from('images')
           .getPublicUrl(filePath)
         
-        newImages.push(publicUrl)
+        // Store the clean URL string
+        newImages.push(publicUrl.toString())
         
         // Update progress
         setUploadProgress(Math.round(((i + 1) / files.length) * 100))

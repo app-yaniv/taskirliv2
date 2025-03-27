@@ -6,8 +6,39 @@ import { useUserAuth } from '@/context/UserAuthContext'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { Clock, Package, ShoppingBag, CalendarDays, Ban, Check, ArrowRight } from 'lucide-react'
+import Image from 'next/image'
 
 type Booking = {
+  id: string
+  item_id: string
+  start_date: string
+  end_date: string
+  total_price: number
+  status: string
+  created_at: string
+  item?: {
+    title: string
+    images: string[]
+    owner_id: string
+  }
+}
+
+interface BookingData {
+  id: string
+  item_id: string
+  start_date: string
+  end_date: string
+  total_price: number
+  status: string
+  created_at: string
+  item?: {
+    title: string
+    images: string[]
+    owner_id: string
+  }
+}
+
+interface RentalData {
   id: string
   item_id: string
   start_date: string
@@ -28,7 +59,7 @@ export default function Dashboard() {
   const supabase = createClient()
   
   const [bookings, setBookings] = useState<Booking[]>([])
-  const [myRentals, setMyRentals] = useState<Booking[]>([])
+  const [rentals, setRentals] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -68,7 +99,7 @@ export default function Dashboard() {
       if (itemsError) throw itemsError
       
       if (userItems && userItems.length > 0) {
-        const itemIds = userItems.map(item => item.id)
+        const itemIds = userItems.map((item: { id: string }) => item.id)
         
         const { data: rentalsOfMyItems, error: rentalsError } = await supabase
           .from('bookings')
@@ -81,7 +112,7 @@ export default function Dashboard() {
         
         if (rentalsError) throw rentalsError
         
-        setMyRentals(rentalsOfMyItems || [])
+        setRentals(rentalsOfMyItems || [])
       }
       
       setBookings(userBookings || [])
@@ -129,6 +160,14 @@ export default function Dashboard() {
       console.error('Error updating booking status:', error.message)
       alert(`שגיאה בעדכון סטטוס ההזמנה: ${error.message}`)
     }
+  }
+
+  const handleBookingAction = (booking: BookingData) => {
+    // ... existing code ...
+  }
+
+  const handleRentalAction = (rental: RentalData) => {
+    // ... existing code ...
   }
 
   if (isLoading || loading) {
@@ -251,9 +290,11 @@ export default function Dashboard() {
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-16 w-16 relative">
                       {booking.item?.images && booking.item.images.length > 0 ? (
-                        <img
+                        <Image
                           src={booking.item.images[0]}
                           alt={booking.item?.title}
+                          width={64}
+                          height={64}
                           className="h-16 w-16 rounded-md object-cover"
                         />
                       ) : (
@@ -308,21 +349,23 @@ export default function Dashboard() {
           <p className="mt-1 max-w-2xl text-sm text-gray-500">פריטים שלך שאחרים שוכרים.</p>
         </div>
         
-        {myRentals.length === 0 ? (
+        {rentals.length === 0 ? (
           <div className="border-t border-gray-200 px-4 py-5 sm:px-6 text-center">
             <p className="text-gray-500">אין הזמנות השכרה לפריטים שלך כרגע.</p>
           </div>
         ) : (
           <ul className="divide-y divide-gray-200">
-            {myRentals.map((rental) => (
+            {rentals.map((rental) => (
               <li key={rental.id} className="px-4 py-4 sm:px-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-16 w-16 relative">
                       {rental.item?.images && rental.item.images.length > 0 ? (
-                        <img
+                        <Image
                           src={rental.item.images[0]}
                           alt={rental.item?.title}
+                          width={64}
+                          height={64}
                           className="h-16 w-16 rounded-md object-cover"
                         />
                       ) : (
