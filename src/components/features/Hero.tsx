@@ -57,12 +57,10 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Debug element, only visible in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed bottom-0 right-0 bg-gray-800 text-white p-2 text-xs z-50">
-          DB: {process.env.NEXT_PUBLIC_SUPABASE_URL?.split('.')[0].slice(-8)}
-        </div>
-      )}
+      {/* Debug element to show which database we're using - visible in all environments */}
+      <div className="fixed bottom-0 right-0 bg-gray-800 text-white p-2 text-xs z-50">
+        DB: {process.env.NEXT_PUBLIC_SUPABASE_URL?.split('.')[0].slice(-8)}
+      </div>
     </div>
   )
 } 
