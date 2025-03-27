@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taskirli - GitHub Pages Test</title>
+    <title>Taskirli - השכרת ציוד</title>
+    <meta http-equiv="refresh" content="0;url=/taskirliv2/">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,11 +19,25 @@
         p {
             margin-bottom: 1.5rem;
         }
+        .loading {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0,112,243,0.3);
+            border-radius: 50%;
+            border-top-color: #0070f3;
+            animation: spin 1s ease-in-out infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
     <h1>Taskirli</h1>
-    <p>This is a test page for GitHub Pages deployment. The actual application will be deployed soon.</p>
-    <p><a href="https://github.com/app-yaniv/taskirliv2">View on GitHub</a></p>
+    <p>מעבירים אותך לאפליקציה...</p>
+    <div class="loading"></div>
+    <p>אם אינך מועבר אוטומטית, <a href="/taskirliv2/">לחץ כאן</a></p>
 </body>
 </html> 

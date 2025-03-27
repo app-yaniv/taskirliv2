@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && New-Item -ItemType File -Path out/.nojekyll -Force",
-    "clean-build": "rimraf .next && next build && New-Item -ItemType File -Path out/.nojekyll -Force",
+    "build": "next build && touch out/.nojekyll",
+    "clean-build": "rimraf .next && next build && touch out/.nojekyll",
     "start": "next start",
     "lint": "next lint"
   },
