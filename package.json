@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node fix-build.js",
-    "clean-build": "rimraf docs && mkdir docs && next build && node fix-build.js",
+    "build": "next build && powershell -ExecutionPolicy Bypass -File ./fix-build.ps1",
+    "clean-build": "rimraf docs && mkdir docs && next build && powershell -ExecutionPolicy Bypass -File ./fix-build.ps1",
     "build-docs": "node build-docs.js",
     "start": "next start",
     "lint": "next lint"

@@ -39,27 +39,59 @@ jobs:
           git branch -a
 
       - name: Build
-        run: npm run build
+        run: next build
 
-      - name: Ensure .nojekyll file exists
+      - name: Create fix-script
         run: |
+          cat > fix-gh-pages.sh << 'EOF'
+          #!/bin/bash
+          echo "Fixing build output for GitHub Pages..."
+          
+          # Create .nojekyll file
           touch docs/.nojekyll
           echo "Created .nojekyll file"
+          
+          # Create root index.html if it doesn't exist
+          if [ ! -f docs/index.html ]; then
+            echo "Creating index.html in docs root"
+            cat > docs/index.html << 'HTMLEOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Redirecting to taskirliv2</title>
+            <meta http-equiv="refresh" content="0; URL=taskirliv2/">
+            <link rel="canonical" href="https://app-yaniv.github.io/taskirliv2/">
+          </head>
+          <body>
+            <p>Redirecting to <a href="https://app-yaniv.github.io/taskirliv2/">https://app-yaniv.github.io/taskirliv2/</a>...</p>
+          </body>
+          </html>
+          HTMLEOF
+          fi
+          
+          # Create .nojekyll in taskirliv2 directory if it exists
+          if [ -d docs/taskirliv2 ]; then
+            touch docs/taskirliv2/.nojekyll
+            echo "Created .nojekyll in taskirliv2 directory"
+            
+            # Copy files from taskirliv2 to docs root
+            echo "Copying index files from taskirliv2 to docs root"
+            cp -r docs/taskirliv2/* docs/ || echo "Copy failed but continuing"
+          fi
+          EOF
+          chmod +x fix-gh-pages.sh
+
+      - name: Run fix script
+        run: ./fix-gh-pages.sh
 
       - name: List build output
         run: |
           ls -la docs/
           echo "Checking for index.html"
-          find docs -name "index.html" | xargs ls -la
-          echo "Checking for _next directory"
+          find docs -name "index.html" | xargs ls -la || echo "No index.html found"
+          echo "Checking for taskirliv2 directory"
           ls -la docs/taskirliv2 || echo "taskirliv2 directory not found"
-          
-      - name: Create index.html in root if needed
-        run: |
-          if [ ! -f docs/index.html ]; then
-            echo "Creating redirect index.html in docs/"
-            echo '<meta http-equiv="refresh" content="0;url=taskirliv2/" />' > docs/index.html
-          fi
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
