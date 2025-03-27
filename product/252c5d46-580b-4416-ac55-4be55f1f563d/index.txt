@@ -1,4 +1,4 @@
-0:["ThkPVNXyGM20xlUSpOLaA",[[["",{"children":["product",{"children":[["id","252c5d46-580b-4416-ac55-4be55f1f563d","d"],{"children":["__PAGE__?{\"id\":\"252c5d46-580b-4416-ac55-4be55f1f563d\"}",{}]}]},"$undefined","$undefined",true]}],"$L1",[null,"$L2"]]]]
+0:["yb6KOPau-BSUgLetwr95e",[[["",{"children":["product",{"children":[["id","252c5d46-580b-4416-ac55-4be55f1f563d","d"],{"children":["__PAGE__?{\"id\":\"252c5d46-580b-4416-ac55-4be55f1f563d\"}",{}]}]},"$undefined","$undefined",true]}],"$L1",[null,"$L2"]]]]
 3:I[6954,[],""]
 4:I[7264,[],""]
 6:"$Sreact.suspense"
