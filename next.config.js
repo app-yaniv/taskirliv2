@@ -24,4 +24,9 @@ const nextConfig = {
   },
 }
 
+// This is important for GitHub Pages
+if (process.env.NODE_ENV === 'production') {
+  console.log('Building for production with basePath: /taskirliv2')
+}
+
 module.exports = nextConfig 

@@ -42,10 +42,24 @@ jobs:
         run: npm run build
 
       - name: Ensure .nojekyll file exists
-        run: touch docs/.nojekyll
+        run: |
+          touch docs/.nojekyll
+          echo "Created .nojekyll file"
 
       - name: List build output
-        run: ls -la docs/
+        run: |
+          ls -la docs/
+          echo "Checking for index.html"
+          find docs -name "index.html" | xargs ls -la
+          echo "Checking for _next directory"
+          ls -la docs/taskirliv2 || echo "taskirliv2 directory not found"
+          
+      - name: Create index.html in root if needed
+        run: |
+          if [ ! -f docs/index.html ]; then
+            echo "Creating redirect index.html in docs/"
+            echo '<meta http-equiv="refresh" content="0;url=taskirliv2/" />' > docs/index.html
+          fi
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
