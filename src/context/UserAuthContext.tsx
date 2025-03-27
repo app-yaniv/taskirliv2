@@ -1,207 +1,132 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, useRef } from 'react'
-import { User, Session, AuthChangeEvent } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
-import { getUserProfile, Profile, updateUserProfile } from '@/utils/supabase/profile'
+import { User, Profile } from '@/types/supabase'
 
-// Increase timeout to 30 seconds for slow backend connections
-const PROFILE_LOADING_TIMEOUT = 30000; // 30 seconds
-
-export type UserAuthContextType = {
+interface UserAuthContextType {
   user: User | null
   profile: Profile | null
-  isLoading: boolean
   isAuthenticated: boolean
+  isLoading: boolean
+  signIn: (email: string, password: string) => Promise<void>
+  signUp: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   updateProfile: (data: Partial<Profile>) => Promise<void>
 }
 
-const UserAuthContext = createContext<UserAuthContextType>({
-  user: null,
-  profile: null,
-  isLoading: true,
-  isAuthenticated: false,
-  signOut: async () => {},
-  updateProfile: async () => {}
-})
-
-// Create a static date string to avoid hydration mismatch
-const STATIC_DATE = '2023-01-01T00:00:00.000Z'
-
-// Helper to create a mock profile with static dates
-const createMockProfile = (userId: string, email?: string): Profile => ({
-  id: userId,
-  created_at: STATIC_DATE,
-  updated_at: STATIC_DATE,
-  display_name: email?.split('@')[0] || null,
-  full_name: null,
-  phone: null,
-  alternative_email: null,
-  address_street: null,
-  address_city: null,
-  address_state: null,
-  address_postal_code: null,
-  address_country: null,
-  avatar_url: null,
-  bio: null,
-  is_verified: false,
-  stripe_customer_id: null,
-  stripe_account_id: null,
-  stripe_onboarding_completed: false,
-  avg_rating: 0,
-  total_reviews: 0,
-  total_rentals: 0
-})
+const UserAuthContext = createContext<UserAuthContextType | undefined>(undefined)
 
 export function UserAuthProvider({ children }: { children: React.ReactNode }) {
-  const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const isLoadingRealProfile = useRef(false)
-  
-  // Set isClient to true when component mounts (client-side only)
+  const supabase = createClient()
+
   useEffect(() => {
     setIsClient(true)
-  }, [])
-
-  // This function attempts to load the profile but doesn't wait for it to complete
-  // It will first create a temporary profile, then update it when the real one loads
-  const loadProfileWithFallback = async (user: User) => {
-    if (!user) return null;
-    
-    // Create and set mock profile immediately
-    const mockProfile = createMockProfile(user.id, user.email || undefined);
-    setProfile(mockProfile);
-    
-    // Don't start multiple profile loading requests simultaneously
-    if (isLoadingRealProfile.current) return mockProfile;
-    
-    // Set loading flag
-    isLoadingRealProfile.current = true;
-    
-    // Start loading the actual profile in the background
-    getUserProfile().then(result => {
-      // Only update if we actually got a profile back
-      if (result.data) {
-        console.log('Real profile loaded successfully, updating from fallback');
-        setProfile(result.data);
-      }
-    }).catch(error => {
-      console.error('Failed to load real profile after fallback:', error);
-    }).finally(() => {
-      isLoadingRealProfile.current = false;
-    });
-    
-    // Return the mock profile for now
-    return mockProfile;
-  };
-
-  useEffect(() => {
-    // Only run auth logic on the client side
-    if (!isClient) return;
-
-    let mounted = true;
-    
     // Get initial session
-    const initializeAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!mounted) return;
-
-        setUser(session?.user ?? null);
-        
-        // Set authentication flag immediately based on session existence
-        const isAuth = !!session?.user;
-        
-        if (session?.user) {
-          // Load a fallback profile immediately and start loading the real one
-          await loadProfileWithFallback(session.user);
-        }
-        
-        // Set loading to false regardless
-        if (mounted) {
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-        if (mounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    initializeAuth();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setIsLoading(false)
+    })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session: Session | null) => {
-        if (!mounted) return;
-        
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // Load a fallback profile immediately and start loading the real one
-          await loadProfileWithFallback(session.user);
-        } else {
-          setProfile(null);
-        }
-        
-        setIsLoading(false);
-      }
-    );
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      setIsLoading(false)
+    })
 
     return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [isClient]);
+      subscription.unsubscribe()
+    }
+  }, [supabase.auth])
+
+  // Fetch profile when user changes
+  useEffect(() => {
+    if (user && !isLoadingRealProfile.current) {
+      isLoadingRealProfile.current = true
+      fetchProfile(user.id)
+    }
+  }, [user])
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+      if (error) throw error
+      setProfile(data)
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+    } finally {
+      isLoadingRealProfile.current = false
+    }
+  }
+
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+    if (error) throw error
+  }
+
+  const signUp = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    })
+    if (error) throw error
+  }
 
   const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      setProfile(null);
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
+    const { error } = await supabase.auth.signOut()
+    if (error) throw error
+    setProfile(null)
+  }
 
   const updateProfile = async (data: Partial<Profile>) => {
-    if (!user) return;
-    try {
-      const { data: updatedProfile, error } = await updateUserProfile(data);
-      if (error) throw error;
-      if (updatedProfile) setProfile(updatedProfile);
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      throw error;
-    }
-  };
+    if (!user) throw new Error('No user logged in')
+    
+    const { error } = await supabase
+      .from('profiles')
+      .update(data)
+      .eq('id', user.id)
+    
+    if (error) throw error
+    
+    // Refresh profile data
+    await fetchProfile(user.id)
+  }
 
-  const isAuthenticated = !!user;
+  const value = {
+    user,
+    profile,
+    isAuthenticated: !!user,
+    isLoading,
+    signIn,
+    signUp,
+    signOut,
+    updateProfile,
+  }
 
   return (
-    <UserAuthContext.Provider
-      value={{
-        user,
-        profile,
-        isLoading,
-        isAuthenticated,
-        signOut,
-        updateProfile
-      }}
-    >
+    <UserAuthContext.Provider value={value}>
       {children}
     </UserAuthContext.Provider>
-  );
+  )
 }
 
 export function useUserAuth() {
-  return useContext(UserAuthContext);
-}
-
-export default UserAuthContext; 
+  const context = useContext(UserAuthContext)
+  if (context === undefined) {
+    throw new Error('useUserAuth must be used within a UserAuthProvider')
+  }
+  return context
+} 

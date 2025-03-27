@@ -1,13 +1,10 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 
 function ResetPasswordContent() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)

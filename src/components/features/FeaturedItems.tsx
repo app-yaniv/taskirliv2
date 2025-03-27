@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
-import { Star, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useUserAuth } from '@/context/UserAuthContext'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
@@ -91,14 +89,6 @@ export default function FeaturedItems() {
 
   const itemsToShow = 3 // Number of items to show at once
   const maxIndex = Math.max(0, featuredItems.length - itemsToShow)
-
-  const handlePrev = () => {
-    setCurrentIndex(prev => Math.max(0, prev - 1))
-  }
-
-  const handleNext = () => {
-    setCurrentIndex(prev => Math.min(maxIndex, prev + 1))
-  }
 
   const getProductLink = (itemId: string) => {
     return `/product/${itemId}`

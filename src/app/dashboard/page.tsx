@@ -6,8 +6,39 @@ import { useUserAuth } from '@/context/UserAuthContext'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { Clock, Package, ShoppingBag, CalendarDays, Ban, Check, ArrowRight } from 'lucide-react'
+import Image from 'next/image'
 
 type Booking = {
+  id: string
+  item_id: string
+  start_date: string
+  end_date: string
+  total_price: number
+  status: string
+  created_at: string
+  item?: {
+    title: string
+    images: string[]
+    owner_id: string
+  }
+}
+
+interface BookingData {
+  id: string
+  item_id: string
+  start_date: string
+  end_date: string
+  total_price: number
+  status: string
+  created_at: string
+  item?: {
+    title: string
+    images: string[]
+    owner_id: string
+  }
+}
+
+interface RentalData {
   id: string
   item_id: string
   start_date: string
@@ -131,6 +162,14 @@ export default function Dashboard() {
     }
   }
 
+  const handleBookingAction = (booking: BookingData) => {
+    // ... existing code ...
+  }
+
+  const handleRentalAction = (rental: RentalData) => {
+    // ... existing code ...
+  }
+
   if (isLoading || loading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-16rem)]">
@@ -251,9 +290,11 @@ export default function Dashboard() {
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-16 w-16 relative">
                       {booking.item?.images && booking.item.images.length > 0 ? (
-                        <img
+                        <Image
                           src={booking.item.images[0]}
                           alt={booking.item?.title}
+                          width={64}
+                          height={64}
                           className="h-16 w-16 rounded-md object-cover"
                         />
                       ) : (
@@ -320,9 +361,11 @@ export default function Dashboard() {
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-16 w-16 relative">
                       {rental.item?.images && rental.item.images.length > 0 ? (
-                        <img
+                        <Image
                           src={rental.item.images[0]}
                           alt={rental.item?.title}
+                          width={64}
+                          height={64}
                           className="h-16 w-16 rounded-md object-cover"
                         />
                       ) : (

@@ -2,6 +2,14 @@
 
 import { createAppClient } from './app-client'
 
+// Replace any with proper type
+interface ProfileData {
+  id: string
+  display_name: string
+  avatar_url: string | null
+  // Add other relevant fields
+}
+
 /**
  * Update user profile data (server-side only, use in app/ directory only)
  * @param userData Profile data to update

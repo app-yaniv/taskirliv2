@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+// Remove createClient import if not used
 
 // Generate static params for static export
 export async function generateStaticParams() {

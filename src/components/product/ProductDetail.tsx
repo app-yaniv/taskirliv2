@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -48,13 +48,9 @@ export default function ProductDetail({ itemId }: ProductDetailProps) {
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
   const [startDate, setStartDate] = useState('')
   
-  useEffect(() => {
-    if (itemId) {
-      fetchItem(itemId)
-    }
-  }, [itemId])
-
-  const fetchItem = async (id: string) => {
+  const fetchItem = useCallback(async () => {
+    if (!itemId) return;
+    
     try {
       setIsLoading(true)
       
@@ -70,7 +66,7 @@ export default function ProductDetail({ itemId }: ProductDetailProps) {
             total_reviews
           )
         `)
-        .eq('id', id)
+        .eq('id', itemId)
         .single()
       
       if (error) {
@@ -88,7 +84,11 @@ export default function ProductDetail({ itemId }: ProductDetailProps) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [itemId, supabase])
+
+  useEffect(() => {
+    fetchItem()
+  }, [fetchItem])
   
   // Calendar setup
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
@@ -189,9 +189,11 @@ export default function ProductDetail({ itemId }: ProductDetailProps) {
             <div className="flex justify-center p-6">
               {item.images && item.images.length > 0 ? (
                 <div className="flex items-center justify-center w-full">
-                  <img
+                  <Image
                     src={item.images[selectedImage] || '/placeholder.jpg'}
                     alt={item.title}
+                    width={500}
+                    height={300}
                     className="w-full max-h-96 object-contain"
                   />
                 </div>
@@ -210,9 +212,11 @@ export default function ProductDetail({ itemId }: ProductDetailProps) {
                     className={`w-16 h-16 rounded-md overflow-hidden ${selectedImage === index ? 'ring-2 ring-blue-500' : ''}`}
                     onClick={() => setSelectedImage(index)}
                   >
-                    <img
+                    <Image
                       src={image || '/placeholder.jpg'}
                       alt={`${item.title} thumbnail ${index + 1}`}
+                      width={50}
+                      height={50}
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -253,9 +257,11 @@ export default function ProductDetail({ itemId }: ProductDetailProps) {
             <div className="flex items-center">
               <div className="flex-shrink-0 h-10 w-10 relative">
                 {item.owner?.avatar_url ? (
-                  <img
+                  <Image
                     src={item.owner.avatar_url}
                     alt={item.owner.display_name || 'Owner'}
+                    width={40}
+                    height={40}
                     className="h-10 w-10 rounded-full object-cover"
                   />
                 ) : (
