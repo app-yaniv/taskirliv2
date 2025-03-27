@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taskirli - Redirecting...</title>
+    <script>
+        // This script handles SPA routing for GitHub Pages
+        // It takes the path and redirects to the index.html with the path as a query parameter
+        const pathSegmentsToKeep = 1; // Keep the first segment (which is 'taskirliv2')
+        
+        const l = window.location;
+        const redirect = sessionStorage.getItem('redirect');
+        
+        // Only redirect if this is the first time loading this page
+        if (!redirect) {
+            sessionStorage.setItem('redirect', 'true');
+            const path = l.pathname.split('/').slice(pathSegmentsToKeep + 1).join('/');
+            window.location.href = `${l.protocol}//${l.hostname}${
+                l.port ? ':' + l.port : ''
+            }/taskirliv2/?path=${path}${l.search ? '&' + l.search.slice(1) : ''}${l.hash}`;
+        } else {
+            // If we've already redirected once, go to the home page
+            sessionStorage.removeItem('redirect');
+            window.location.href = `${l.protocol}//${l.hostname}${
+                l.port ? ':' + l.port : ''
+            }/taskirliv2/`;
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+        }
+        h1 {
+            color: #0070f3;
+        }
+        p {
+            margin-bottom: 1.5rem;
+        }
+        .loading {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0,112,243,0.3);
+            border-radius: 50%;
+            border-top-color: #0070f3;
+            animation: spin 1s ease-in-out infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Taskirli</h1>
+    <p>מעבירים אותך לדף המבוקש...</p>
+    <div class="loading"></div>
+    <p>אם אינך מועבר אוטומטית, <a href="https://app-yaniv.github.io/taskirliv2/">לחץ כאן</a></p>
+</body>
+</html> 
