@@ -29,8 +29,23 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
+      - name: Debug environment
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Next.js version: $(npm list next | grep next)"
+          echo "Repository details:"
+          git remote -v
+          echo "Branch details:"
+          git branch -a
+
       - name: Build
         run: npm run build
+
+      - name: Ensure .nojekyll file exists
+        run: touch docs/.nojekyll
+
+      - name: List build output
+        run: ls -la docs/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
