@@ -11,7 +11,7 @@ if (fs.existsSync(indexPath)) {
 <head>
   <meta charset="utf-8">
   <title>TaskirLiv2</title>
-  <meta http-equiv="refresh" content="0; URL=./">
+  <meta http-equiv="refresh" content="0; URL=https://app-yaniv.github.io/taskirliv2/product/7ef9ba3b-84fb-40b4-8447-91a97deee6b3">
   <link rel="canonical" href="https://app-yaniv.github.io/taskirliv2/">
 </head>
 <body>
@@ -28,7 +28,7 @@ if (fs.existsSync(indexPath)) {
 <head>
   <meta charset="utf-8">
   <title>TaskirLiv2</title>
-  <meta http-equiv="refresh" content="0; URL=./">
+  <meta http-equiv="refresh" content="0; URL=https://app-yaniv.github.io/taskirliv2/product/7ef9ba3b-84fb-40b4-8447-91a97deee6b3">
   <link rel="canonical" href="https://app-yaniv.github.io/taskirliv2/">
 </head>
 <body>
