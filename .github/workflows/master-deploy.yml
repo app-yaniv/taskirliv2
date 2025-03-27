@@ -39,7 +39,7 @@ jobs:
           git branch -a
 
       - name: Build
-        run: next build
+        run: npx next build
 
       - name: Create fix-script
         run: |
