@@ -31,7 +31,7 @@ if (!fs.existsSync(path.join('docs', 'index.html'))) {
     <title>Taskirli - השכרת ציוד</title>
     <script>
         // Redirect to the actual application
-        window.location.href = '/';
+        window.location.href = '/taskirliv2/';
     </script>
     <style>
         body {
@@ -66,7 +66,7 @@ if (!fs.existsSync(path.join('docs', 'index.html'))) {
     <h1>Taskirli</h1>
     <p>מעבירים אותך לאפליקציה...</p>
     <div class="loading"></div>
-    <p>אם אינך מועבר אוטומטית, <a href="/">לחץ כאן</a></p>
+    <p>אם אינך מועבר אוטומטית, <a href="/taskirliv2/">לחץ כאן</a></p>
 </body>
 </html>`;
   

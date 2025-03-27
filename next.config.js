@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  basePath: '',
+  basePath: '/taskirliv2',
   distDir: 'docs',
   images: {
     remotePatterns: [
