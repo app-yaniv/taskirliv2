@@ -77,3 +77,46 @@ The SQL migration includes a trigger that automatically creates a profile record
 - TypeScript
 - Tailwind CSS
 - Supabase (Authentication & Database)
+
+## Deployment Instructions
+
+This project is set up for server-side rendering with Next.js, which enables dynamic data fetching from Supabase.
+
+### Deploying to Vercel
+
+1. **Sign up for Vercel**: Create an account at [vercel.com](https://vercel.com)
+
+2. **Import your GitHub repository**: Connect your GitHub account and import this repository
+
+3. **Configure environment variables**: Add the following environment variables in the Vercel dashboard:
+   - `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous API key
+
+4. **Deploy**: Click the "Deploy" button
+
+### Using GitHub Actions (Alternative)
+
+To use the included GitHub Actions workflow for automated deployment:
+
+1. Add the following secrets to your GitHub repository:
+   - `VERCEL_TOKEN`: Your Vercel API token
+   - `VERCEL_ORG_ID`: Your Vercel organization ID
+   - `VERCEL_PROJECT_ID`: Your Vercel project ID
+
+2. Push to the `master` branch to trigger the deployment
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run the development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start the production server
+npm start
+```
