@@ -8,6 +8,7 @@ export default function ProductLayout({
   return (
     <div className="product-layout">
       {children}
+      {/* Client components will be loaded after static generation */}
     </div>
   )
 } 
