@@ -13,7 +13,8 @@ fs.writeFileSync('docs/.nojekyll', '');
 // Run the Next.js build
 console.log('Building the Next.js application...');
 try {
-  execSync('npm run build', { stdio: 'inherit' });
+  // Use clean-build to ensure docs directory is properly cleared first
+  execSync('npm run clean-build', { stdio: 'inherit' });
   console.log('Build completed successfully!');
 } catch (error) {
   console.error('Build failed:', error);

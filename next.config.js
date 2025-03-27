@@ -16,7 +16,9 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    serverActions: true,
+    serverActions: {
+      allowedOrigins: ["localhost:3000", "app-yaniv.github.io"]
+    }
   },
 }
 
