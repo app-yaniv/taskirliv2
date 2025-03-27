@@ -1,44 +1,33 @@
-name: Build and Deploy from Master
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - master
-  workflow_dispatch:  # Allow manual triggering
-
-permissions:
-  contents: write
+    branches: [master]
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://cyyysackouocgruznqrb.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5eXlzYWNrb3VvY2dydXpucXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4MjU5MjUsImV4cCI6MjA1ODQwMTkyNX0.0e8Fky57O3_XPmggO9JltN4f4his76OhPag0CTZlF-0
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v2
         with:
-          node-version: '18'
+          node-version: '20'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm install
 
-      - name: Create env file
-        run: |
-          echo "NEXT_PUBLIC_SUPABASE_URL=https://cyyysackouocgruznqrb.supabase.co" > .env.production
-          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5eXlzYWNrb3VvY2dydXpucXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4MjU5MjUsImV4cCI6MjA1ODQwMTkyNX0.0e8Fky57O3_XPmggO9JltN4f4his76OhPag0CTZlF-0" >> .env.production
-          
       - name: Build
         run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: https://cyyysackouocgruznqrb.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5eXlzYWNrb3VvY2dydXpucXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4MjU5MjUsImV4cCI6MjA1ODQwMTkyNX0.0e8Fky57O3_XPmggO9JltN4f4his76OhPag0CTZlF-0
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          publish_branch: gh-pages
-          force_orphan: true 
+          publish_dir: ./docs 

@@ -3,9 +3,17 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
+interface Product {
+  id: string
+  title: string
+  description: string
+  price: number
+  image_url?: string
+}
+
 export default function ProductClient({ id }: { id: string }) {
-  const [product, setProduct] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const [product, setProduct] = useState<Product | null>(null)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
