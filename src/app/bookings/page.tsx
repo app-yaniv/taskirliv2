@@ -1,0 +1,232 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useUserAuth } from '@/context/UserAuthContext'
+import { createClient } from '@/utils/supabase/client'
+import Image from 'next/image'
+import { Calendar, Clock, AlertCircle } from 'lucide-react'
+import Link from 'next/link'
+
+interface Booking {
+  id: string
+  item_id: string
+  renter_id: string
+  start_date: string
+  days: number
+  total_price: number
+  status: 'pending' | 'active' | 'completed' | 'cancelled'
+  created_at: string
+  item: {
+    title: string
+    images: string[]
+    owner_profile: {
+      display_name: string
+      avatar_url: string | null
+    }
+  }
+}
+
+export default function BookingsPage() {
+  const { user, isLoading } = useUserAuth()
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [isLoadingBookings, setIsLoadingBookings] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [imageFailed, setImageFailed] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      fetchBookings()
+    }
+  }, [isLoading, user])
+
+  const fetchBookings = async () => {
+    setIsLoadingBookings(true)
+    setError(null)
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('rentals')
+        .select(`
+          *,
+          item:items (
+            title,
+            images,
+            owner_profile:profiles!owner_id (
+              display_name,
+              avatar_url
+            )
+          )
+        `)
+        .eq('renter_id', user?.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setBookings(data || [])
+    } catch (err: any) {
+      console.error('Error fetching bookings:', err)
+      setError('אירעה שגיאה בטעינת ההזמנות. אנא נסה שוב מאוחר יותר.')
+    } finally {
+      setIsLoadingBookings(false)
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('he-IL', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })
+  }
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending': return 'ממתין לאישור'
+      case 'active': return 'פעיל'
+      case 'completed': return 'הושלם'
+      case 'cancelled': return 'בוטל'
+      default: return status
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-100 text-yellow-800'
+      case 'active': return 'bg-green-100 text-green-800'
+      case 'completed': return 'bg-blue-100 text-blue-800'
+      case 'cancelled': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const handleImageError = (id: string) => {
+    setImageFailed(prev => ({ ...prev, [id]: true }))
+  }
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">ההזמנות שלי</h1>
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 my-8">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <AlertCircle className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+            </div>
+            <div className="mr-3">
+              <h3 className="text-sm font-medium text-yellow-800">אינך מחובר</h3>
+              <div className="mt-2 text-sm text-yellow-700">
+                <p>יש להתחבר כדי לצפות בהזמנות שלך.</p>
+                <Link href="/auth/signin" className="font-medium underline text-yellow-700 hover:text-yellow-600 mt-2 inline-block">
+                  התחבר כעת
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" dir="rtl">
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">ההזמנות שלי</h1>
+      
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <AlertCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
+            </div>
+            <div className="mr-3">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {isLoadingBookings ? (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      ) : bookings.length === 0 ? (
+        <div className="bg-white shadow rounded-lg p-6 text-center">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">אין לך הזמנות עדיין</h3>
+          <p className="text-gray-600 mb-4">נראה שעדיין לא ביצעת הזמנות. תוכל למצוא פריטים להשכרה בדף הבית.</p>
+          <Link href="/" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+            חזרה לדף הבית
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {bookings.map((booking) => (
+            <div key={booking.id} className="bg-white shadow rounded-lg overflow-hidden">
+              <div className="p-6">
+                <div className="flex flex-col md:flex-row">
+                  <div className="w-full md:w-1/4 mb-4 md:mb-0">
+                    <div className="aspect-w-16 aspect-h-9 relative rounded-lg overflow-hidden">
+                      {booking.item?.images?.[0] && !imageFailed[booking.id] ? (
+                        <Image
+                          src={booking.item.images[0]}
+                          alt={booking.item.title}
+                          fill
+                          className="object-cover"
+                          onError={() => handleImageError(booking.id)}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-500">אין תמונה</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="w-full md:w-3/4 md:pr-6">
+                    <div className="flex justify-between items-start">
+                      <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                        {booking.item?.title || 'פריט לא קיים'}
+                      </h2>
+                      <span className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusColor(booking.status)}`}>
+                        {getStatusText(booking.status)}
+                      </span>
+                    </div>
+                    
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-center text-gray-700">
+                        <Calendar className="h-5 w-5 ml-2 text-gray-400" />
+                        <span>תאריך התחלה: {formatDate(booking.start_date)}</span>
+                      </div>
+                      <div className="flex items-center text-gray-700">
+                        <Clock className="h-5 w-5 ml-2 text-gray-400" />
+                        <span>משך זמן: {booking.days} ימים</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 flex items-center justify-between">
+                      <div className="text-lg font-bold text-blue-600">₪{booking.total_price}</div>
+                      <Link
+                        href={`/rent/${booking.item_id}`}
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50"
+                      >
+                        לפרטי הפריט
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
