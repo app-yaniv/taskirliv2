@@ -3,12 +3,14 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import Image from 'next/image'
 
 interface Category {
   name: string
   slug: string
   subcategories: Subcategory[]
   bgColor: string
+  imagePath: string
 }
 
 interface Subcategory {
@@ -24,6 +26,7 @@ export default function CategoriesPage() {
       name: 'ציוד בנייה וכלי עבודה',
       slug: 'construction-tools',
       bgColor: 'bg-amber-500',
+      imagePath: '/images/categories/construction-tools.jpg',
       subcategories: [
         { name: 'מקדחות ומברגים', slug: 'drills-screwdrivers', parentCategory: 'construction-tools' },
         { name: 'ציוד חשמל ואנרגיה', slug: 'electricity-energy', parentCategory: 'construction-tools' },
@@ -41,6 +44,7 @@ export default function CategoriesPage() {
       name: 'אלקטרוניקה',
       slug: 'electronics',
       bgColor: 'bg-blue-500',
+      imagePath: '/images/categories/electronics.jpg',
       subcategories: [
         { name: 'מערכות סאונד', slug: 'sound', parentCategory: 'electronics' },
         { name: 'רחפנים', slug: 'drones', parentCategory: 'electronics' },
@@ -57,6 +61,7 @@ export default function CategoriesPage() {
       name: 'סרטים וצילום',
       slug: 'film-photography',
       bgColor: 'bg-purple-500',
+      imagePath: '/images/categories/photography.jpg',
       subcategories: [
         { name: 'עדשות מצלמה', slug: 'camera-lenses', parentCategory: 'film-photography' },
         { name: 'מצלמות', slug: 'cameras', parentCategory: 'film-photography' },
@@ -73,6 +78,7 @@ export default function CategoriesPage() {
       name: 'בית וגינה',
       slug: 'home-garden',
       bgColor: 'bg-green-500',
+      imagePath: '/images/categories/home-garden.jpg',
       subcategories: [
         { name: 'ציוד לבית', slug: 'home', parentCategory: 'home-garden' },
         { name: 'מכונות גינה', slug: 'garden-machinery', parentCategory: 'home-garden' },
@@ -85,6 +91,7 @@ export default function CategoriesPage() {
       name: 'אירועים ומסיבות',
       slug: 'party',
       bgColor: 'bg-pink-500',
+      imagePath: '/images/categories/party.jpg',
       subcategories: [
         { name: 'הגברה, תאורה ובמה', slug: 'sound-light-scene', parentCategory: 'party' },
         { name: 'תלבושות', slug: 'clothes', parentCategory: 'party' },
@@ -101,6 +108,7 @@ export default function CategoriesPage() {
       name: 'ספורט ופנאי',
       slug: 'sports-leisure',
       bgColor: 'bg-red-500',
+      imagePath: '/images/categories/sports.jpg',
       subcategories: [
         { name: 'כלי נגינה', slug: 'musical-instruments', parentCategory: 'sports-leisure' },
         { name: 'אופניים', slug: 'cycling', parentCategory: 'sports-leisure' },
@@ -117,6 +125,7 @@ export default function CategoriesPage() {
       name: 'רכב',
       slug: 'vehicle',
       bgColor: 'bg-gray-700',
+      imagePath: '/images/categories/vehicle.jpg',
       subcategories: [
         { name: 'אביזרי רכב', slug: 'car-accessories', parentCategory: 'vehicle' },
         { name: 'כלי עבודה לרכב', slug: 'workshop', parentCategory: 'vehicle' },
@@ -130,6 +139,7 @@ export default function CategoriesPage() {
       name: 'אחר',
       slug: 'other',
       bgColor: 'bg-gray-500',
+      imagePath: '/images/categories/other.jpg',
       subcategories: [
         { name: 'נכסים', slug: 'premises', parentCategory: 'other' },
         { name: 'שונות', slug: 'misc', parentCategory: 'other' },
@@ -142,11 +152,18 @@ export default function CategoriesPage() {
     Object.fromEntries(categories.map(cat => [cat.slug, false]))
   )
 
+  // State to track image loading errors
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
+
   const toggleCategory = (categorySlug: string) => {
     setExpandedCategories(prev => ({
       ...prev,
       [categorySlug]: !prev[categorySlug]
     }))
+  }
+
+  const handleImageError = (slug: string) => {
+    setImageErrors(prev => ({ ...prev, [slug]: true }))
   }
 
   return (
@@ -156,8 +173,20 @@ export default function CategoriesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {categories.map((category) => (
           <div key={category.slug} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-            <div className={`relative h-48 ${category.bgColor} flex items-center justify-center`}>
-              <span className="text-white text-2xl font-bold">{category.name}</span>
+            <div className={`relative h-48 ${imageErrors[category.slug] ? category.bgColor : ''}`}>
+              {!imageErrors[category.slug] ? (
+                <Image 
+                  src={category.imagePath}
+                  alt={category.name}
+                  fill
+                  className="object-cover"
+                  onError={() => handleImageError(category.slug)}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <span className="text-white text-2xl font-bold">{category.name}</span>
+                </div>
+              )}
             </div>
             
             <div className="p-4">

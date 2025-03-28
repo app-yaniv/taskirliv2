@@ -32,6 +32,8 @@ export default function CategoryPage() {
   const [error, setError] = useState<string | null>(null)
   const [categoryName, setCategoryName] = useState('')
   const [categoryBgColor, setCategoryBgColor] = useState('bg-blue-500')
+  const [categoryImage, setCategoryImage] = useState('')
+  const [categoryImageError, setCategoryImageError] = useState(false)
   const [imageFailed, setImageFailed] = useState<Record<string, boolean>>({})
 
   // All category data (this should match your categories page)
@@ -40,6 +42,7 @@ export default function CategoryPage() {
       name: 'ציוד בנייה וכלי עבודה',
       slug: 'construction-tools',
       bgColor: 'bg-amber-500',
+      imagePath: '/images/categories/construction-tools.jpg',
       subcategories: [
         { name: 'מקדחות ומברגים', slug: 'drills-screwdrivers', parentCategory: 'construction-tools' },
         { name: 'ציוד חשמל ואנרגיה', slug: 'electricity-energy', parentCategory: 'construction-tools' },
@@ -57,6 +60,7 @@ export default function CategoryPage() {
       name: 'אלקטרוניקה',
       slug: 'electronics',
       bgColor: 'bg-blue-500',
+      imagePath: '/images/categories/electronics.jpg',
       subcategories: [
         { name: 'מערכות סאונד', slug: 'sound', parentCategory: 'electronics' },
         { name: 'רחפנים', slug: 'drones', parentCategory: 'electronics' },
@@ -73,6 +77,7 @@ export default function CategoryPage() {
       name: 'סרטים וצילום',
       slug: 'film-photography',
       bgColor: 'bg-purple-500',
+      imagePath: '/images/categories/photography.jpg',
       subcategories: [
         { name: 'עדשות מצלמה', slug: 'camera-lenses', parentCategory: 'film-photography' },
         { name: 'מצלמות', slug: 'cameras', parentCategory: 'film-photography' },
@@ -89,6 +94,7 @@ export default function CategoryPage() {
       name: 'בית וגינה',
       slug: 'home-garden',
       bgColor: 'bg-green-500',
+      imagePath: '/images/categories/home-garden.jpg',
       subcategories: [
         { name: 'ציוד לבית', slug: 'home', parentCategory: 'home-garden' },
         { name: 'מכונות גינה', slug: 'garden-machinery', parentCategory: 'home-garden' },
@@ -101,6 +107,7 @@ export default function CategoryPage() {
       name: 'אירועים ומסיבות',
       slug: 'party',
       bgColor: 'bg-pink-500',
+      imagePath: '/images/categories/party.jpg',
       subcategories: [
         { name: 'הגברה, תאורה ובמה', slug: 'sound-light-scene', parentCategory: 'party' },
         { name: 'תלבושות', slug: 'clothes', parentCategory: 'party' },
@@ -117,6 +124,7 @@ export default function CategoryPage() {
       name: 'ספורט ופנאי',
       slug: 'sports-leisure',
       bgColor: 'bg-red-500',
+      imagePath: '/images/categories/sports.jpg',
       subcategories: [
         { name: 'כלי נגינה', slug: 'musical-instruments', parentCategory: 'sports-leisure' },
         { name: 'אופניים', slug: 'cycling', parentCategory: 'sports-leisure' },
@@ -133,6 +141,7 @@ export default function CategoryPage() {
       name: 'רכב',
       slug: 'vehicle',
       bgColor: 'bg-gray-700',
+      imagePath: '/images/categories/vehicle.jpg',
       subcategories: [
         { name: 'אביזרי רכב', slug: 'car-accessories', parentCategory: 'vehicle' },
         { name: 'כלי עבודה לרכב', slug: 'workshop', parentCategory: 'vehicle' },
@@ -146,6 +155,7 @@ export default function CategoryPage() {
       name: 'אחר',
       slug: 'other',
       bgColor: 'bg-gray-500',
+      imagePath: '/images/categories/other.jpg',
       subcategories: [
         { name: 'נכסים', slug: 'premises', parentCategory: 'other' },
         { name: 'שונות', slug: 'misc', parentCategory: 'other' },
@@ -158,6 +168,7 @@ export default function CategoryPage() {
     if (currentCategory) {
       setCategoryName(currentCategory.name)
       setCategoryBgColor(currentCategory.bgColor)
+      setCategoryImage(currentCategory.imagePath)
       fetchItems()
     } else {
       setError('קטגוריה לא נמצאה')
@@ -197,6 +208,10 @@ export default function CategoryPage() {
     setImageFailed(prev => ({ ...prev, [id]: true }))
   }
 
+  const handleCategoryImageError = () => {
+    setCategoryImageError(true)
+  }
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('he-IL', {
       style: 'currency',
@@ -220,10 +235,30 @@ export default function CategoryPage() {
         <span className="text-gray-900 font-medium">{categoryName}</span>
       </nav>
 
-      {/* Category header with colored background */}
-      <div className={`${categoryBgColor} text-white rounded-lg p-8 mb-8`}>
-        <h1 className="text-3xl font-bold">{categoryName}</h1>
-        <p className="mt-2 text-white/80">מצא פריטים להשכרה בקטגוריית {categoryName}</p>
+      {/* Category header with image or colored background */}
+      <div className={`relative rounded-lg overflow-hidden mb-8 ${categoryImageError ? categoryBgColor : ''}`}>
+        {!categoryImageError && categoryImage ? (
+          <div className="relative h-48 w-full">
+            <Image 
+              src={categoryImage}
+              alt={categoryName}
+              fill
+              className="object-cover"
+              onError={handleCategoryImageError}
+            />
+            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center p-8">
+              <div className="text-center">
+                <h1 className="text-3xl font-bold text-white">{categoryName}</h1>
+                <p className="mt-2 text-white/90">מצא פריטים להשכרה בקטגוריית {categoryName}</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className={`${categoryBgColor} text-white p-8`}>
+            <h1 className="text-3xl font-bold">{categoryName}</h1>
+            <p className="mt-2 text-white/80">מצא פריטים להשכרה בקטגוריית {categoryName}</p>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center justify-between mb-8">
