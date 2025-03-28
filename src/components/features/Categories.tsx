@@ -8,37 +8,43 @@ const categories = [
     name: 'ציוד בנייה וכלי עבודה',
     image: '/images/categories/construction-tools.jpg',
     slug: 'construction-tools',
-    count: '2,345'
+    count: '2,345',
+    color: 'bg-amber-500'
   },
   { 
     name: 'אלקטרוניקה',
     image: '/images/categories/electronics.jpg',
     slug: 'electronics',
-    count: '856'
+    count: '856',
+    color: 'bg-blue-500'
   },
   {
     name: 'סרטים וצילום',
     image: '/images/categories/photography.jpg',
     slug: 'film-photography',
-    count: '789'
+    count: '789',
+    color: 'bg-purple-500'
   },
   {
     name: 'בית וגינה',
     image: '/images/categories/home-garden.jpg',
     slug: 'home-garden',
-    count: '3,456'
+    count: '3,456',
+    color: 'bg-green-500'
   },
   {
     name: 'אירועים ומסיבות',
     image: '/images/categories/party.jpg',
     slug: 'party',
-    count: '1,234'
+    count: '1,234',
+    color: 'bg-pink-500'
   },
   { 
     name: 'ספורט ופנאי',
     image: '/images/categories/sports.jpg',
     slug: 'sports-leisure',
-    count: '1,567'
+    count: '1,567',
+    color: 'bg-red-500'
   },
 ]
 
@@ -62,12 +68,19 @@ export default function Categories() {
               href={`/categories/${category.slug}`}
               className="group relative bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
             >
-              <div className="aspect-w-16 aspect-h-9 relative">
+              <div className={`aspect-w-16 aspect-h-9 relative ${category.color}`} style={{height: "200px"}}>
                 <Image
                   src={category.image}
                   alt={category.name}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  priority
+                  onError={(e) => {
+                    // If image fails to load, we'll rely on the colored background
+                    const imgElement = e.currentTarget;
+                    imgElement.style.display = 'none';
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent group-hover:from-black/80 transition-colors duration-300"></div>
               </div>
