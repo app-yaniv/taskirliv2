@@ -87,6 +87,9 @@ const Header = () => {
             <Link href="/dashboard" className="px-3 py-2 text-sm font-medium text-gray-900 hover:text-blue-600">
               לוח בקרה
             </Link>
+            <Link href="/categories" className="px-3 py-2 text-sm font-medium text-gray-900 hover:text-blue-600">
+              קטגוריות
+            </Link>
             <Link href="/bookings" className="px-3 py-2 text-sm font-medium text-gray-900 hover:text-blue-600">
               הזמנות
             </Link>
@@ -173,6 +176,12 @@ const Header = () => {
               className="block px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-600"
             >
               לוח בקרה
+            </Link>
+            <Link 
+              href="/categories" 
+              className="block px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-600"
+            >
+              קטגוריות
             </Link>
             <Link 
               href="/bookings" 
