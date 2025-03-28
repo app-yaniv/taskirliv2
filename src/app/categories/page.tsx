@@ -3,13 +3,12 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import Image from 'next/image'
 
 interface Category {
   name: string
   slug: string
   subcategories: Subcategory[]
-  image?: string
+  bgColor: string
 }
 
 interface Subcategory {
@@ -24,7 +23,7 @@ export default function CategoriesPage() {
     {
       name: 'ציוד בנייה וכלי עבודה',
       slug: 'construction-tools',
-      image: '/images/categories/construction-tools.jpg',
+      bgColor: 'bg-amber-500',
       subcategories: [
         { name: 'מקדחות ומברגים', slug: 'drills-screwdrivers', parentCategory: 'construction-tools' },
         { name: 'ציוד חשמל ואנרגיה', slug: 'electricity-energy', parentCategory: 'construction-tools' },
@@ -41,7 +40,7 @@ export default function CategoriesPage() {
     {
       name: 'אלקטרוניקה',
       slug: 'electronics',
-      image: '/images/categories/electronics.jpg',
+      bgColor: 'bg-blue-500',
       subcategories: [
         { name: 'מערכות סאונד', slug: 'sound', parentCategory: 'electronics' },
         { name: 'רחפנים', slug: 'drones', parentCategory: 'electronics' },
@@ -57,7 +56,7 @@ export default function CategoriesPage() {
     {
       name: 'סרטים וצילום',
       slug: 'film-photography',
-      image: '/images/categories/photography.jpg',
+      bgColor: 'bg-purple-500',
       subcategories: [
         { name: 'עדשות מצלמה', slug: 'camera-lenses', parentCategory: 'film-photography' },
         { name: 'מצלמות', slug: 'cameras', parentCategory: 'film-photography' },
@@ -73,7 +72,7 @@ export default function CategoriesPage() {
     {
       name: 'בית וגינה',
       slug: 'home-garden',
-      image: '/images/categories/home-garden.jpg',
+      bgColor: 'bg-green-500',
       subcategories: [
         { name: 'ציוד לבית', slug: 'home', parentCategory: 'home-garden' },
         { name: 'מכונות גינה', slug: 'garden-machinery', parentCategory: 'home-garden' },
@@ -85,7 +84,7 @@ export default function CategoriesPage() {
     {
       name: 'אירועים ומסיבות',
       slug: 'party',
-      image: '/images/categories/party.jpg',
+      bgColor: 'bg-pink-500',
       subcategories: [
         { name: 'הגברה, תאורה ובמה', slug: 'sound-light-scene', parentCategory: 'party' },
         { name: 'תלבושות', slug: 'clothes', parentCategory: 'party' },
@@ -101,7 +100,7 @@ export default function CategoriesPage() {
     {
       name: 'ספורט ופנאי',
       slug: 'sports-leisure',
-      image: '/images/categories/sports.jpg',
+      bgColor: 'bg-red-500',
       subcategories: [
         { name: 'כלי נגינה', slug: 'musical-instruments', parentCategory: 'sports-leisure' },
         { name: 'אופניים', slug: 'cycling', parentCategory: 'sports-leisure' },
@@ -117,7 +116,7 @@ export default function CategoriesPage() {
     {
       name: 'רכב',
       slug: 'vehicle',
-      image: '/images/categories/vehicle.jpg',
+      bgColor: 'bg-gray-700',
       subcategories: [
         { name: 'אביזרי רכב', slug: 'car-accessories', parentCategory: 'vehicle' },
         { name: 'כלי עבודה לרכב', slug: 'workshop', parentCategory: 'vehicle' },
@@ -130,7 +129,7 @@ export default function CategoriesPage() {
     {
       name: 'אחר',
       slug: 'other',
-      image: '/images/categories/other.jpg',
+      bgColor: 'bg-gray-500',
       subcategories: [
         { name: 'נכסים', slug: 'premises', parentCategory: 'other' },
         { name: 'שונות', slug: 'misc', parentCategory: 'other' },
@@ -157,23 +156,8 @@ export default function CategoriesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {categories.map((category) => (
           <div key={category.slug} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-            <div className="relative h-48 bg-gray-200">
-              {category.image ? (
-                <div className="relative w-full h-full">
-                  <Image 
-                    src={category.image} 
-                    alt={category.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover"
-                    priority={false}
-                  />
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <span className="text-gray-400">אין תמונה</span>
-                </div>
-              )}
+            <div className={`relative h-48 ${category.bgColor} flex items-center justify-center`}>
+              <span className="text-white text-2xl font-bold">{category.name}</span>
             </div>
             
             <div className="p-4">

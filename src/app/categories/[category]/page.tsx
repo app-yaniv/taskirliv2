@@ -31,6 +31,7 @@ export default function CategoryPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [categoryName, setCategoryName] = useState('')
+  const [categoryBgColor, setCategoryBgColor] = useState('bg-blue-500')
   const [imageFailed, setImageFailed] = useState<Record<string, boolean>>({})
 
   // All category data (this should match your categories page)
@@ -38,6 +39,7 @@ export default function CategoryPage() {
     {
       name: 'ציוד בנייה וכלי עבודה',
       slug: 'construction-tools',
+      bgColor: 'bg-amber-500',
       subcategories: [
         { name: 'מקדחות ומברגים', slug: 'drills-screwdrivers', parentCategory: 'construction-tools' },
         { name: 'ציוד חשמל ואנרגיה', slug: 'electricity-energy', parentCategory: 'construction-tools' },
@@ -54,6 +56,7 @@ export default function CategoryPage() {
     {
       name: 'אלקטרוניקה',
       slug: 'electronics',
+      bgColor: 'bg-blue-500',
       subcategories: [
         { name: 'מערכות סאונד', slug: 'sound', parentCategory: 'electronics' },
         { name: 'רחפנים', slug: 'drones', parentCategory: 'electronics' },
@@ -66,13 +69,95 @@ export default function CategoryPage() {
         { name: 'מסופי סליקה', slug: 'card-terminals', parentCategory: 'electronics' },
       ]
     },
-    // Include all other categories here (omitted for brevity)
+    {
+      name: 'סרטים וצילום',
+      slug: 'film-photography',
+      bgColor: 'bg-purple-500',
+      subcategories: [
+        { name: 'עדשות מצלמה', slug: 'camera-lenses', parentCategory: 'film-photography' },
+        { name: 'מצלמות', slug: 'cameras', parentCategory: 'film-photography' },
+        { name: 'פלאשים ותאורה', slug: 'flash-lights', parentCategory: 'film-photography' },
+        { name: 'חצובות וריגים', slug: 'stands-rigs', parentCategory: 'film-photography' },
+        { name: 'ערכות מצלמה', slug: 'camera-packages', parentCategory: 'film-photography' },
+        { name: 'מוניטורים', slug: 'monitors', parentCategory: 'film-photography' },
+        { name: 'סוללות למצלמה', slug: 'camera-batteries', parentCategory: 'film-photography' },
+        { name: 'כרטיסי זיכרון', slug: 'memory-cards', parentCategory: 'film-photography' },
+        { name: 'רקעים לצילום', slug: 'photo-backgrounds', parentCategory: 'film-photography' },
+      ]
+    },
+    {
+      name: 'בית וגינה',
+      slug: 'home-garden',
+      bgColor: 'bg-green-500',
+      subcategories: [
+        { name: 'ציוד לבית', slug: 'home', parentCategory: 'home-garden' },
+        { name: 'מכונות גינה', slug: 'garden-machinery', parentCategory: 'home-garden' },
+        { name: 'סולמות', slug: 'ladders', parentCategory: 'home-garden' },
+        { name: 'כלי גינה', slug: 'garden-tools', parentCategory: 'home-garden' },
+        { name: 'ריהוט גן', slug: 'garden-furniture', parentCategory: 'home-garden' },
+      ]
+    },
+    {
+      name: 'אירועים ומסיבות',
+      slug: 'party',
+      bgColor: 'bg-pink-500',
+      subcategories: [
+        { name: 'הגברה, תאורה ובמה', slug: 'sound-light-scene', parentCategory: 'party' },
+        { name: 'תלבושות', slug: 'clothes', parentCategory: 'party' },
+        { name: 'ריהוט לאירועים', slug: 'party-furniture', parentCategory: 'party' },
+        { name: 'ציוד מטבח לאירועים', slug: 'party-kitchen', parentCategory: 'party' },
+        { name: 'אוהלים וגזיבו', slug: 'marquees', parentCategory: 'party' },
+        { name: 'פעילויות לאירועים', slug: 'party-activities', parentCategory: 'party' },
+        { name: 'קישוטים לאירועים', slug: 'party-decorations', parentCategory: 'party' },
+        { name: 'ערכות לאירועים', slug: 'party-combos', parentCategory: 'party' },
+        { name: 'חימום לפטיו', slug: 'patio-heaters', parentCategory: 'party' },
+      ]
+    },
+    {
+      name: 'ספורט ופנאי',
+      slug: 'sports-leisure',
+      bgColor: 'bg-red-500',
+      subcategories: [
+        { name: 'כלי נגינה', slug: 'musical-instruments', parentCategory: 'sports-leisure' },
+        { name: 'אופניים', slug: 'cycling', parentCategory: 'sports-leisure' },
+        { name: 'חיי שטח', slug: 'outdoor-life', parentCategory: 'sports-leisure' },
+        { name: 'משחקים ותחביבים', slug: 'play-hobby', parentCategory: 'sports-leisure' },
+        { name: 'ספורט', slug: 'sports', parentCategory: 'sports-leisure' },
+        { name: 'ספורט ימי', slug: 'watersports', parentCategory: 'sports-leisure' },
+        { name: 'אימון וכושר', slug: 'training-gym', parentCategory: 'sports-leisure' },
+        { name: 'ספורט חורף', slug: 'winter-sports', parentCategory: 'sports-leisure' },
+        { name: 'נסיעות וטיולים', slug: 'travel', parentCategory: 'sports-leisure' },
+      ]
+    },
+    {
+      name: 'רכב',
+      slug: 'vehicle',
+      bgColor: 'bg-gray-700',
+      subcategories: [
+        { name: 'אביזרי רכב', slug: 'car-accessories', parentCategory: 'vehicle' },
+        { name: 'כלי עבודה לרכב', slug: 'workshop', parentCategory: 'vehicle' },
+        { name: 'סירות', slug: 'boats', parentCategory: 'vehicle' },
+        { name: 'קרוואנים', slug: 'recreational-vehicle', parentCategory: 'vehicle' },
+        { name: 'נגררים', slug: 'trailers', parentCategory: 'vehicle' },
+        { name: 'אופנועים ואביזרים', slug: 'mc-accessories', parentCategory: 'vehicle' },
+      ]
+    },
+    {
+      name: 'אחר',
+      slug: 'other',
+      bgColor: 'bg-gray-500',
+      subcategories: [
+        { name: 'נכסים', slug: 'premises', parentCategory: 'other' },
+        { name: 'שונות', slug: 'misc', parentCategory: 'other' },
+      ]
+    }
   ]
 
   useEffect(() => {
     const currentCategory = categories.find(cat => cat.slug === categorySlug)
     if (currentCategory) {
       setCategoryName(currentCategory.name)
+      setCategoryBgColor(currentCategory.bgColor)
       fetchItems()
     } else {
       setError('קטגוריה לא נמצאה')
@@ -135,8 +220,14 @@ export default function CategoryPage() {
         <span className="text-gray-900 font-medium">{categoryName}</span>
       </nav>
 
+      {/* Category header with colored background */}
+      <div className={`${categoryBgColor} text-white rounded-lg p-8 mb-8`}>
+        <h1 className="text-3xl font-bold">{categoryName}</h1>
+        <p className="mt-2 text-white/80">מצא פריטים להשכרה בקטגוריית {categoryName}</p>
+      </div>
+
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{categoryName}</h1>
+        <h2 className="text-2xl font-bold text-gray-900">פריטים בקטגוריה זו</h2>
         
         {/* Filter button - can be replaced with actual filters */}
         <button className="flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">

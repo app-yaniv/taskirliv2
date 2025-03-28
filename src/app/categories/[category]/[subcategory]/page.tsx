@@ -27,6 +27,7 @@ interface Item {
 interface CategoryInfo {
   name: string
   slug: string
+  bgColor: string
   subcategories: {
     name: string
     slug: string
@@ -51,6 +52,7 @@ export default function SubcategoryPage() {
     {
       name: 'ציוד בנייה וכלי עבודה',
       slug: 'construction-tools',
+      bgColor: 'bg-amber-500',
       subcategories: [
         { name: 'מקדחות ומברגים', slug: 'drills-screwdrivers', parentCategory: 'construction-tools' },
         { name: 'ציוד חשמל ואנרגיה', slug: 'electricity-energy', parentCategory: 'construction-tools' },
@@ -67,6 +69,7 @@ export default function SubcategoryPage() {
     {
       name: 'אלקטרוניקה',
       slug: 'electronics',
+      bgColor: 'bg-blue-500',
       subcategories: [
         { name: 'מערכות סאונד', slug: 'sound', parentCategory: 'electronics' },
         { name: 'רחפנים', slug: 'drones', parentCategory: 'electronics' },
