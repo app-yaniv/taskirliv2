@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useUserAuth } from '@/context/UserAuthContext'
 import Hero from '@/components/features/Hero'
 import Categories from '@/components/features/Categories'
 import FeaturedItems from '@/components/features/FeaturedItems'
 import Benefits from '@/components/features/Benefits'
-import { useUserAuth } from '@/context/UserAuthContext'
 
 export default function Home() {
   const { user, profile, isAuthenticated } = useUserAuth()
@@ -21,7 +21,7 @@ export default function Home() {
         name = user.email.split('@')[0];
       }
       
-      setGreeting(`שלום ${name}, ברוך הבא חזרה!`)
+      setGreeting(`שלום ${name}! ברוך הבא חזרה.`)
     }
   }, [isAuthenticated, user, profile])
 
@@ -32,9 +32,6 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between">
               <p className="text-blue-700 font-medium">{greeting}</p>
-              <a href="/dashboard" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-                לוח הבקרה שלי &rarr;
-              </a>
             </div>
           </div>
         </div>
